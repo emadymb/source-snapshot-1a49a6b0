@@ -106,6 +106,7 @@ import { Route as ClientAccountingSalesRouteImport } from './routes/client.accou
 import { Route as ClientAccountingSalariesRouteImport } from './routes/client.accounting.salaries'
 import { Route as ClientAccountingReportsRouteImport } from './routes/client.accounting.reports'
 import { Route as ClientAccountingRemindersRouteImport } from './routes/client.accounting.reminders'
+import { Route as ClientAccountingReceiptsRouteImport } from './routes/client.accounting.receipts'
 import { Route as ClientAccountingQuotationsRouteImport } from './routes/client.accounting.quotations'
 import { Route as ClientAccountingPurchasesRouteImport } from './routes/client.accounting.purchases'
 import { Route as ClientAccountingPosRouteImport } from './routes/client.accounting.pos'
@@ -629,6 +630,12 @@ const ClientAccountingRemindersRoute =
     path: '/reminders',
     getParentRoute: () => ClientAccountingRoute,
   } as any)
+const ClientAccountingReceiptsRoute =
+  ClientAccountingReceiptsRouteImport.update({
+    id: '/receipts',
+    path: '/receipts',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
 const ClientAccountingQuotationsRoute =
   ClientAccountingQuotationsRouteImport.update({
     id: '/quotations',
@@ -928,6 +935,7 @@ export interface FileRoutesByFullPath {
   '/client/accounting/pos': typeof ClientAccountingPosRoute
   '/client/accounting/purchases': typeof ClientAccountingPurchasesRoute
   '/client/accounting/quotations': typeof ClientAccountingQuotationsRoute
+  '/client/accounting/receipts': typeof ClientAccountingReceiptsRoute
   '/client/accounting/reminders': typeof ClientAccountingRemindersRoute
   '/client/accounting/reports': typeof ClientAccountingReportsRoute
   '/client/accounting/salaries': typeof ClientAccountingSalariesRoute
@@ -1054,6 +1062,7 @@ export interface FileRoutesByTo {
   '/client/accounting/pos': typeof ClientAccountingPosRoute
   '/client/accounting/purchases': typeof ClientAccountingPurchasesRoute
   '/client/accounting/quotations': typeof ClientAccountingQuotationsRoute
+  '/client/accounting/receipts': typeof ClientAccountingReceiptsRoute
   '/client/accounting/reminders': typeof ClientAccountingRemindersRoute
   '/client/accounting/reports': typeof ClientAccountingReportsRoute
   '/client/accounting/salaries': typeof ClientAccountingSalariesRoute
@@ -1188,6 +1197,7 @@ export interface FileRoutesById {
   '/client/accounting/pos': typeof ClientAccountingPosRoute
   '/client/accounting/purchases': typeof ClientAccountingPurchasesRoute
   '/client/accounting/quotations': typeof ClientAccountingQuotationsRoute
+  '/client/accounting/receipts': typeof ClientAccountingReceiptsRoute
   '/client/accounting/reminders': typeof ClientAccountingRemindersRoute
   '/client/accounting/reports': typeof ClientAccountingReportsRoute
   '/client/accounting/salaries': typeof ClientAccountingSalariesRoute
@@ -1323,6 +1333,7 @@ export interface FileRouteTypes {
     | '/client/accounting/pos'
     | '/client/accounting/purchases'
     | '/client/accounting/quotations'
+    | '/client/accounting/receipts'
     | '/client/accounting/reminders'
     | '/client/accounting/reports'
     | '/client/accounting/salaries'
@@ -1449,6 +1460,7 @@ export interface FileRouteTypes {
     | '/client/accounting/pos'
     | '/client/accounting/purchases'
     | '/client/accounting/quotations'
+    | '/client/accounting/receipts'
     | '/client/accounting/reminders'
     | '/client/accounting/reports'
     | '/client/accounting/salaries'
@@ -1582,6 +1594,7 @@ export interface FileRouteTypes {
     | '/client/accounting/pos'
     | '/client/accounting/purchases'
     | '/client/accounting/quotations'
+    | '/client/accounting/receipts'
     | '/client/accounting/reminders'
     | '/client/accounting/reports'
     | '/client/accounting/salaries'
@@ -2323,6 +2336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientAccountingRemindersRouteImport
       parentRoute: typeof ClientAccountingRoute
     }
+    '/client/accounting/receipts': {
+      id: '/client/accounting/receipts'
+      path: '/receipts'
+      fullPath: '/client/accounting/receipts'
+      preLoaderRoute: typeof ClientAccountingReceiptsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
     '/client/accounting/quotations': {
       id: '/client/accounting/quotations'
       path: '/quotations'
@@ -2604,6 +2624,7 @@ interface ClientAccountingRouteChildren {
   ClientAccountingPosRoute: typeof ClientAccountingPosRoute
   ClientAccountingPurchasesRoute: typeof ClientAccountingPurchasesRoute
   ClientAccountingQuotationsRoute: typeof ClientAccountingQuotationsRoute
+  ClientAccountingReceiptsRoute: typeof ClientAccountingReceiptsRoute
   ClientAccountingRemindersRoute: typeof ClientAccountingRemindersRoute
   ClientAccountingReportsRoute: typeof ClientAccountingReportsRoute
   ClientAccountingSalariesRoute: typeof ClientAccountingSalariesRoute
@@ -2644,6 +2665,7 @@ const ClientAccountingRouteChildren: ClientAccountingRouteChildren = {
   ClientAccountingPosRoute: ClientAccountingPosRoute,
   ClientAccountingPurchasesRoute: ClientAccountingPurchasesRoute,
   ClientAccountingQuotationsRoute: ClientAccountingQuotationsRoute,
+  ClientAccountingReceiptsRoute: ClientAccountingReceiptsRoute,
   ClientAccountingRemindersRoute: ClientAccountingRemindersRoute,
   ClientAccountingReportsRoute: ClientAccountingReportsRoute,
   ClientAccountingSalariesRoute: ClientAccountingSalariesRoute,

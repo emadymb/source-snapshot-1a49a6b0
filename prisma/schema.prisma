@@ -1066,3 +1066,33 @@ model ReceiptExtraction {
   @@index([companyId])
   @@map("receipt_extractions")
 }
+
+// ============================================================================
+// Expenses (out-of-pocket / vendor spend, separate from full invoices)
+// ============================================================================
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REIMBURSED
+  REJECTED
+}
+
+model Expense {
+  id            String        @id @default(uuid()) @db.Uuid
+  companyId     String        @map("company_id") @db.Uuid
+  createdBy     String?       @map("created_by") @db.Uuid
+  date          DateTime      @default(now())
+  vendor        String
+  category      String        @default("Other")
+  amountCents   Int           @map("amount_cents")
+  vatRate       Float         @default(24) @map("vat_rate")
+  currency      String        @default("EUR")
+  notes         String?
+  status        ExpenseStatus @default(PENDING)
+  receiptExtractionId String? @unique @map("receipt_extraction_id") @db.Uuid
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@index([companyId])
+  @@map("expenses")
+}
