@@ -1,0 +1,69 @@
+# Fiksu — local production-grade infrastructure
+# Start with:  docker compose up -d
+#
+# Services:
+#   - PostgreSQL 16   (localhost:5432, user/db "fiksu", password "fiksu")
+#   - Redis 7         (localhost:6379)  — cache / queues
+#   - MinIO           (S3 API :9000, Console :9001, minioadmin/minioadmin)
+#
+# After the DB is up, apply the schema + RLS:
+#   bunx prisma migrate deploy       (or: bunx prisma migrate dev)
+#   bun run db:seed
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fiksu_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: fiksu
+      POSTGRES_PASSWORD: fiksu
+      POSTGRES_DB: fiksu
+    volumes:
+      - fiksu_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fiksu -d fiksu"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: fiksu_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - fiksu_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: fiksu_minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # Web console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - fiksu_miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  fiksu_pgdata:
+  fiksu_redisdata:
+  fiksu_miniodata:

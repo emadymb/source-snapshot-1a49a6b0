@@ -9,38 +9,1788 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SuperRouteImport } from './routes/super'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SetupRouteImport } from './routes/setup'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as SecurityRouteImport } from './routes/security'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as FirmRouteImport } from './routes/firm'
+import { Route as FeaturesRouteImport } from './routes/features'
+import { Route as DpaRouteImport } from './routes/dpa'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ClientRouteImport } from './routes/client'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuperIndexRouteImport } from './routes/super.index'
+import { Route as FirmIndexRouteImport } from './routes/firm.index'
+import { Route as ClientIndexRouteImport } from './routes/client.index'
+import { Route as SuperWorkspacesRouteImport } from './routes/super.workspaces'
+import { Route as SuperWebhooksRouteImport } from './routes/super.webhooks'
+import { Route as SuperUsersRouteImport } from './routes/super.users'
+import { Route as SuperTeamRouteImport } from './routes/super.team'
+import { Route as SuperSubscriptionsRouteImport } from './routes/super.subscriptions'
+import { Route as SuperSettingsRouteImport } from './routes/super.settings'
+import { Route as SuperSecurityRouteImport } from './routes/super.security'
+import { Route as SuperRolesRouteImport } from './routes/super.roles'
+import { Route as SuperRequestsRouteImport } from './routes/super.requests'
+import { Route as SuperReportsRouteImport } from './routes/super.reports'
+import { Route as SuperPlansRouteImport } from './routes/super.plans'
+import { Route as SuperPlanBuilderRouteImport } from './routes/super.plan-builder'
+import { Route as SuperPageBuilderRouteImport } from './routes/super.page-builder'
+import { Route as SuperModulesRouteImport } from './routes/super.modules'
+import { Route as SuperInvoicesRouteImport } from './routes/super.invoices'
+import { Route as SuperHealthRouteImport } from './routes/super.health'
+import { Route as SuperGatewaysRouteImport } from './routes/super.gateways'
+import { Route as SuperEmailsRouteImport } from './routes/super.emails'
+import { Route as SuperDeveloperRouteImport } from './routes/super.developer'
+import { Route as SuperCouponsRouteImport } from './routes/super.coupons'
+import { Route as SuperCmsRouteImport } from './routes/super.cms'
+import { Route as SuperClientsNewRouteImport } from './routes/super.clients-new'
+import { Route as SuperAuditRouteImport } from './routes/super.audit'
+import { Route as SuperApiDocsRouteImport } from './routes/super.api-docs'
+import { Route as SuperAnnouncementsRouteImport } from './routes/super.announcements'
+import { Route as SuperAiRouteImport } from './routes/super.ai'
+import { Route as StaffLoginRouteImport } from './routes/staff.login'
+import { Route as FirmTimeRouteImport } from './routes/firm.time'
+import { Route as FirmTasksRouteImport } from './routes/firm.tasks'
+import { Route as FirmStaffRouteImport } from './routes/firm.staff'
+import { Route as FirmSettingsRouteImport } from './routes/firm.settings'
+import { Route as FirmRolesRouteImport } from './routes/firm.roles'
+import { Route as FirmReportsRouteImport } from './routes/firm.reports'
+import { Route as FirmInvoicesRouteImport } from './routes/firm.invoices'
+import { Route as FirmEngagementsRouteImport } from './routes/firm.engagements'
+import { Route as FirmDocumentsRouteImport } from './routes/firm.documents'
+import { Route as FirmClientsNewRouteImport } from './routes/firm.clients-new'
+import { Route as FirmClientsRouteImport } from './routes/firm.clients'
+import { Route as FirmAuditRouteImport } from './routes/firm.audit'
+import { Route as ClientTicketsRouteImport } from './routes/client.tickets'
+import { Route as ClientSettingsRouteImport } from './routes/client.settings'
+import { Route as ClientScanRouteImport } from './routes/client.scan'
+import { Route as ClientInsightsRouteImport } from './routes/client.insights'
+import { Route as ClientFirmBillingRouteImport } from './routes/client.firm-billing'
+import { Route as ClientDocumentsRouteImport } from './routes/client.documents'
+import { Route as ClientBillingRouteImport } from './routes/client.billing'
+import { Route as ClientBankingRouteImport } from './routes/client.banking'
+import { Route as ClientAiRouteImport } from './routes/client.ai'
+import { Route as ClientAccountingRouteImport } from './routes/client.accounting'
+import { Route as CCardNumberRouteImport } from './routes/c.$cardNumber'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as SuperCmsIndexRouteImport } from './routes/super.cms.index'
+import { Route as SuperAiIndexRouteImport } from './routes/super.ai.index'
+import { Route as ClientAiIndexRouteImport } from './routes/client.ai.index'
+import { Route as ClientAccountingIndexRouteImport } from './routes/client.accounting.index'
+import { Route as SuperCmsPagesRouteImport } from './routes/super.cms.pages'
+import { Route as SuperCmsMenusRouteImport } from './routes/super.cms.menus'
+import { Route as SuperCmsBlogRouteImport } from './routes/super.cms.blog'
+import { Route as SuperAiWidgetRouteImport } from './routes/super.ai.widget'
+import { Route as SuperAiSettingsRouteImport } from './routes/super.ai.settings'
+import { Route as SuperAiLeadsRouteImport } from './routes/super.ai.leads'
+import { Route as SuperAiDashboardRouteImport } from './routes/super.ai.dashboard'
+import { Route as SuperAiConversationsRouteImport } from './routes/super.ai.conversations'
+import { Route as ClientBillingCallbackRouteImport } from './routes/client.billing.callback'
+import { Route as ClientAiChatRouteImport } from './routes/client.ai.chat'
+import { Route as ClientAccountingTasksRouteImport } from './routes/client.accounting.tasks'
+import { Route as ClientAccountingSettingsRouteImport } from './routes/client.accounting.settings'
+import { Route as ClientAccountingSalesRouteImport } from './routes/client.accounting.sales'
+import { Route as ClientAccountingSalariesRouteImport } from './routes/client.accounting.salaries'
+import { Route as ClientAccountingReportsRouteImport } from './routes/client.accounting.reports'
+import { Route as ClientAccountingRemindersRouteImport } from './routes/client.accounting.reminders'
+import { Route as ClientAccountingQuotationsRouteImport } from './routes/client.accounting.quotations'
+import { Route as ClientAccountingPurchasesRouteImport } from './routes/client.accounting.purchases'
+import { Route as ClientAccountingPosRouteImport } from './routes/client.accounting.pos'
+import { Route as ClientAccountingPayrollRouteImport } from './routes/client.accounting.payroll'
+import { Route as ClientAccountingMessagesRouteImport } from './routes/client.accounting.messages'
+import { Route as ClientAccountingMemosRouteImport } from './routes/client.accounting.memos'
+import { Route as ClientAccountingLoyaltyRouteImport } from './routes/client.accounting.loyalty'
+import { Route as ClientAccountingLocationsRouteImport } from './routes/client.accounting.locations'
+import { Route as ClientAccountingLedgerRouteImport } from './routes/client.accounting.ledger'
+import { Route as ClientAccountingLeavesRouteImport } from './routes/client.accounting.leaves'
+import { Route as ClientAccountingJournalsRouteImport } from './routes/client.accounting.journals'
+import { Route as ClientAccountingInventoryRouteImport } from './routes/client.accounting.inventory'
+import { Route as ClientAccountingHrmRouteImport } from './routes/client.accounting.hrm'
+import { Route as ClientAccountingHolidaysRouteImport } from './routes/client.accounting.holidays'
+import { Route as ClientAccountingExpensesRouteImport } from './routes/client.accounting.expenses'
+import { Route as ClientAccountingEmployeesRouteImport } from './routes/client.accounting.employees'
+import { Route as ClientAccountingEInvoicesSettingsRouteImport } from './routes/client.accounting.e-invoices-settings'
+import { Route as ClientAccountingEInvoicesInboxRouteImport } from './routes/client.accounting.e-invoices-inbox'
+import { Route as ClientAccountingEInvoicesRouteImport } from './routes/client.accounting.e-invoices'
+import { Route as ClientAccountingDraftsRouteImport } from './routes/client.accounting.drafts'
+import { Route as ClientAccountingDebtOverridesRouteImport } from './routes/client.accounting.debt-overrides'
+import { Route as ClientAccountingCrmRouteImport } from './routes/client.accounting.crm'
+import { Route as ClientAccountingContactsRouteImport } from './routes/client.accounting.contacts'
+import { Route as ClientAccountingCommissionsRouteImport } from './routes/client.accounting.commissions'
+import { Route as ClientAccountingCashBoxesRouteImport } from './routes/client.accounting.cash-boxes'
+import { Route as ClientAccountingCardsRouteImport } from './routes/client.accounting.cards'
+import { Route as ClientAccountingAttendanceRouteImport } from './routes/client.accounting.attendance'
+import { Route as ClientAccountingAnalyticsRouteImport } from './routes/client.accounting.analytics'
+import { Route as ClientAccountingAccountsRouteImport } from './routes/client.accounting.accounts'
+import { Route as ApiPublicYtjBusinessIdRouteImport } from './routes/api/public/ytj.$businessId'
+import { Route as ApiPublicWidgetEmbedDotjsRouteImport } from './routes/api/public/widget.embed[.]js'
+import { Route as ApiPublicWidgetChatRouteImport } from './routes/api/public/widget.chat'
+import { Route as ApiPublicEinvoiceStatusRouteImport } from './routes/api/public/einvoice.status'
+import { Route as ApiPublicEinvoiceInboundRouteImport } from './routes/api/public/einvoice.inbound'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperRoute = SuperRouteImport.update({
+  id: '/super',
+  path: '/super',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetupRoute = SetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FirmRoute = FirmRouteImport.update({
+  id: '/firm',
+  path: '/firm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeaturesRoute = FeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DpaRoute = DpaRouteImport.update({
+  id: '/dpa',
+  path: '/dpa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientRoute = ClientRouteImport.update({
+  id: '/client',
+  path: '/client',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuperIndexRoute = SuperIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SuperRoute,
+} as any)
+const FirmIndexRoute = FirmIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FirmRoute,
+} as any)
+const ClientIndexRoute = ClientIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClientRoute,
+} as any)
+const SuperWorkspacesRoute = SuperWorkspacesRouteImport.update({
+  id: '/workspaces',
+  path: '/workspaces',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperWebhooksRoute = SuperWebhooksRouteImport.update({
+  id: '/webhooks',
+  path: '/webhooks',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperUsersRoute = SuperUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperTeamRoute = SuperTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperSubscriptionsRoute = SuperSubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperSettingsRoute = SuperSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperSecurityRoute = SuperSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperRolesRoute = SuperRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperRequestsRoute = SuperRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperReportsRoute = SuperReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperPlansRoute = SuperPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperPlanBuilderRoute = SuperPlanBuilderRouteImport.update({
+  id: '/plan-builder',
+  path: '/plan-builder',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperPageBuilderRoute = SuperPageBuilderRouteImport.update({
+  id: '/page-builder',
+  path: '/page-builder',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperModulesRoute = SuperModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperInvoicesRoute = SuperInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperHealthRoute = SuperHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperGatewaysRoute = SuperGatewaysRouteImport.update({
+  id: '/gateways',
+  path: '/gateways',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperEmailsRoute = SuperEmailsRouteImport.update({
+  id: '/emails',
+  path: '/emails',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperDeveloperRoute = SuperDeveloperRouteImport.update({
+  id: '/developer',
+  path: '/developer',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperCouponsRoute = SuperCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperCmsRoute = SuperCmsRouteImport.update({
+  id: '/cms',
+  path: '/cms',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperClientsNewRoute = SuperClientsNewRouteImport.update({
+  id: '/clients-new',
+  path: '/clients-new',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperAuditRoute = SuperAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperApiDocsRoute = SuperApiDocsRouteImport.update({
+  id: '/api-docs',
+  path: '/api-docs',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperAnnouncementsRoute = SuperAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => SuperRoute,
+} as any)
+const SuperAiRoute = SuperAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => SuperRoute,
+} as any)
+const StaffLoginRoute = StaffLoginRouteImport.update({
+  id: '/staff/login',
+  path: '/staff/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FirmTimeRoute = FirmTimeRouteImport.update({
+  id: '/time',
+  path: '/time',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmTasksRoute = FirmTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmStaffRoute = FirmStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmSettingsRoute = FirmSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmRolesRoute = FirmRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmReportsRoute = FirmReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmInvoicesRoute = FirmInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmEngagementsRoute = FirmEngagementsRouteImport.update({
+  id: '/engagements',
+  path: '/engagements',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmDocumentsRoute = FirmDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmClientsNewRoute = FirmClientsNewRouteImport.update({
+  id: '/clients-new',
+  path: '/clients-new',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmClientsRoute = FirmClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => FirmRoute,
+} as any)
+const FirmAuditRoute = FirmAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => FirmRoute,
+} as any)
+const ClientTicketsRoute = ClientTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientSettingsRoute = ClientSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientScanRoute = ClientScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientInsightsRoute = ClientInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientFirmBillingRoute = ClientFirmBillingRouteImport.update({
+  id: '/firm-billing',
+  path: '/firm-billing',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientDocumentsRoute = ClientDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientBillingRoute = ClientBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientBankingRoute = ClientBankingRouteImport.update({
+  id: '/banking',
+  path: '/banking',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientAiRoute = ClientAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientAccountingRoute = ClientAccountingRouteImport.update({
+  id: '/accounting',
+  path: '/accounting',
+  getParentRoute: () => ClientRoute,
+} as any)
+const CCardNumberRoute = CCardNumberRouteImport.update({
+  id: '/c/$cardNumber',
+  path: '/c/$cardNumber',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperCmsIndexRoute = SuperCmsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SuperCmsRoute,
+} as any)
+const SuperAiIndexRoute = SuperAiIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SuperAiRoute,
+} as any)
+const ClientAiIndexRoute = ClientAiIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClientAiRoute,
+} as any)
+const ClientAccountingIndexRoute = ClientAccountingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const SuperCmsPagesRoute = SuperCmsPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
+  getParentRoute: () => SuperCmsRoute,
+} as any)
+const SuperCmsMenusRoute = SuperCmsMenusRouteImport.update({
+  id: '/menus',
+  path: '/menus',
+  getParentRoute: () => SuperCmsRoute,
+} as any)
+const SuperCmsBlogRoute = SuperCmsBlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => SuperCmsRoute,
+} as any)
+const SuperAiWidgetRoute = SuperAiWidgetRouteImport.update({
+  id: '/widget',
+  path: '/widget',
+  getParentRoute: () => SuperAiRoute,
+} as any)
+const SuperAiSettingsRoute = SuperAiSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => SuperAiRoute,
+} as any)
+const SuperAiLeadsRoute = SuperAiLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => SuperAiRoute,
+} as any)
+const SuperAiDashboardRoute = SuperAiDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => SuperAiRoute,
+} as any)
+const SuperAiConversationsRoute = SuperAiConversationsRouteImport.update({
+  id: '/conversations',
+  path: '/conversations',
+  getParentRoute: () => SuperAiRoute,
+} as any)
+const ClientBillingCallbackRoute = ClientBillingCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => ClientBillingRoute,
+} as any)
+const ClientAiChatRoute = ClientAiChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => ClientAiRoute,
+} as any)
+const ClientAccountingTasksRoute = ClientAccountingTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingSettingsRoute =
+  ClientAccountingSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingSalesRoute = ClientAccountingSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingSalariesRoute =
+  ClientAccountingSalariesRouteImport.update({
+    id: '/salaries',
+    path: '/salaries',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingReportsRoute = ClientAccountingReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingRemindersRoute =
+  ClientAccountingRemindersRouteImport.update({
+    id: '/reminders',
+    path: '/reminders',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingQuotationsRoute =
+  ClientAccountingQuotationsRouteImport.update({
+    id: '/quotations',
+    path: '/quotations',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingPurchasesRoute =
+  ClientAccountingPurchasesRouteImport.update({
+    id: '/purchases',
+    path: '/purchases',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingPosRoute = ClientAccountingPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingPayrollRoute = ClientAccountingPayrollRouteImport.update({
+  id: '/payroll',
+  path: '/payroll',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingMessagesRoute =
+  ClientAccountingMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingMemosRoute = ClientAccountingMemosRouteImport.update({
+  id: '/memos',
+  path: '/memos',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingLoyaltyRoute = ClientAccountingLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingLocationsRoute =
+  ClientAccountingLocationsRouteImport.update({
+    id: '/locations',
+    path: '/locations',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingLedgerRoute = ClientAccountingLedgerRouteImport.update({
+  id: '/ledger',
+  path: '/ledger',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingLeavesRoute = ClientAccountingLeavesRouteImport.update({
+  id: '/leaves',
+  path: '/leaves',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingJournalsRoute =
+  ClientAccountingJournalsRouteImport.update({
+    id: '/journals',
+    path: '/journals',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingInventoryRoute =
+  ClientAccountingInventoryRouteImport.update({
+    id: '/inventory',
+    path: '/inventory',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingHrmRoute = ClientAccountingHrmRouteImport.update({
+  id: '/hrm',
+  path: '/hrm',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingHolidaysRoute =
+  ClientAccountingHolidaysRouteImport.update({
+    id: '/holidays',
+    path: '/holidays',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingExpensesRoute =
+  ClientAccountingExpensesRouteImport.update({
+    id: '/expenses',
+    path: '/expenses',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingEmployeesRoute =
+  ClientAccountingEmployeesRouteImport.update({
+    id: '/employees',
+    path: '/employees',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingEInvoicesSettingsRoute =
+  ClientAccountingEInvoicesSettingsRouteImport.update({
+    id: '/e-invoices-settings',
+    path: '/e-invoices-settings',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingEInvoicesInboxRoute =
+  ClientAccountingEInvoicesInboxRouteImport.update({
+    id: '/e-invoices-inbox',
+    path: '/e-invoices-inbox',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingEInvoicesRoute =
+  ClientAccountingEInvoicesRouteImport.update({
+    id: '/e-invoices',
+    path: '/e-invoices',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingDraftsRoute = ClientAccountingDraftsRouteImport.update({
+  id: '/drafts',
+  path: '/drafts',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingDebtOverridesRoute =
+  ClientAccountingDebtOverridesRouteImport.update({
+    id: '/debt-overrides',
+    path: '/debt-overrides',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingCrmRoute = ClientAccountingCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingContactsRoute =
+  ClientAccountingContactsRouteImport.update({
+    id: '/contacts',
+    path: '/contacts',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingCommissionsRoute =
+  ClientAccountingCommissionsRouteImport.update({
+    id: '/commissions',
+    path: '/commissions',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingCashBoxesRoute =
+  ClientAccountingCashBoxesRouteImport.update({
+    id: '/cash-boxes',
+    path: '/cash-boxes',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingCardsRoute = ClientAccountingCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => ClientAccountingRoute,
+} as any)
+const ClientAccountingAttendanceRoute =
+  ClientAccountingAttendanceRouteImport.update({
+    id: '/attendance',
+    path: '/attendance',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingAnalyticsRoute =
+  ClientAccountingAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ClientAccountingAccountsRoute =
+  ClientAccountingAccountsRouteImport.update({
+    id: '/accounts',
+    path: '/accounts',
+    getParentRoute: () => ClientAccountingRoute,
+  } as any)
+const ApiPublicYtjBusinessIdRoute = ApiPublicYtjBusinessIdRouteImport.update({
+  id: '/api/public/ytj/$businessId',
+  path: '/api/public/ytj/$businessId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWidgetEmbedDotjsRoute =
+  ApiPublicWidgetEmbedDotjsRouteImport.update({
+    id: '/api/public/widget/embed.js',
+    path: '/api/public/widget/embed.js',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWidgetChatRoute = ApiPublicWidgetChatRouteImport.update({
+  id: '/api/public/widget/chat',
+  path: '/api/public/widget/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEinvoiceStatusRoute = ApiPublicEinvoiceStatusRouteImport.update({
+  id: '/api/public/einvoice/status',
+  path: '/api/public/einvoice/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicEinvoiceInboundRoute =
+  ApiPublicEinvoiceInboundRouteImport.update({
+    id: '/api/public/einvoice/inbound',
+    path: '/api/public/einvoice/inbound',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/client': typeof ClientRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
+  '/dpa': typeof DpaRoute
+  '/features': typeof FeaturesRoute
+  '/firm': typeof FirmRouteWithChildren
+  '/help': typeof HelpRoute
+  '/integrations': typeof IntegrationsRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
+  '/services': typeof ServicesRoute
+  '/setup': typeof SetupRoute
+  '/signup': typeof SignupRoute
+  '/super': typeof SuperRouteWithChildren
+  '/terms': typeof TermsRoute
+  '/api/chat': typeof ApiChatRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/c/$cardNumber': typeof CCardNumberRoute
+  '/client/accounting': typeof ClientAccountingRouteWithChildren
+  '/client/ai': typeof ClientAiRouteWithChildren
+  '/client/banking': typeof ClientBankingRoute
+  '/client/billing': typeof ClientBillingRouteWithChildren
+  '/client/documents': typeof ClientDocumentsRoute
+  '/client/firm-billing': typeof ClientFirmBillingRoute
+  '/client/insights': typeof ClientInsightsRoute
+  '/client/scan': typeof ClientScanRoute
+  '/client/settings': typeof ClientSettingsRoute
+  '/client/tickets': typeof ClientTicketsRoute
+  '/firm/audit': typeof FirmAuditRoute
+  '/firm/clients': typeof FirmClientsRoute
+  '/firm/clients-new': typeof FirmClientsNewRoute
+  '/firm/documents': typeof FirmDocumentsRoute
+  '/firm/engagements': typeof FirmEngagementsRoute
+  '/firm/invoices': typeof FirmInvoicesRoute
+  '/firm/reports': typeof FirmReportsRoute
+  '/firm/roles': typeof FirmRolesRoute
+  '/firm/settings': typeof FirmSettingsRoute
+  '/firm/staff': typeof FirmStaffRoute
+  '/firm/tasks': typeof FirmTasksRoute
+  '/firm/time': typeof FirmTimeRoute
+  '/staff/login': typeof StaffLoginRoute
+  '/super/ai': typeof SuperAiRouteWithChildren
+  '/super/announcements': typeof SuperAnnouncementsRoute
+  '/super/api-docs': typeof SuperApiDocsRoute
+  '/super/audit': typeof SuperAuditRoute
+  '/super/clients-new': typeof SuperClientsNewRoute
+  '/super/cms': typeof SuperCmsRouteWithChildren
+  '/super/coupons': typeof SuperCouponsRoute
+  '/super/developer': typeof SuperDeveloperRoute
+  '/super/emails': typeof SuperEmailsRoute
+  '/super/gateways': typeof SuperGatewaysRoute
+  '/super/health': typeof SuperHealthRoute
+  '/super/invoices': typeof SuperInvoicesRoute
+  '/super/modules': typeof SuperModulesRoute
+  '/super/page-builder': typeof SuperPageBuilderRoute
+  '/super/plan-builder': typeof SuperPlanBuilderRoute
+  '/super/plans': typeof SuperPlansRoute
+  '/super/reports': typeof SuperReportsRoute
+  '/super/requests': typeof SuperRequestsRoute
+  '/super/roles': typeof SuperRolesRoute
+  '/super/security': typeof SuperSecurityRoute
+  '/super/settings': typeof SuperSettingsRoute
+  '/super/subscriptions': typeof SuperSubscriptionsRoute
+  '/super/team': typeof SuperTeamRoute
+  '/super/users': typeof SuperUsersRoute
+  '/super/webhooks': typeof SuperWebhooksRoute
+  '/super/workspaces': typeof SuperWorkspacesRoute
+  '/client/': typeof ClientIndexRoute
+  '/firm/': typeof FirmIndexRoute
+  '/super/': typeof SuperIndexRoute
+  '/client/accounting/accounts': typeof ClientAccountingAccountsRoute
+  '/client/accounting/analytics': typeof ClientAccountingAnalyticsRoute
+  '/client/accounting/attendance': typeof ClientAccountingAttendanceRoute
+  '/client/accounting/cards': typeof ClientAccountingCardsRoute
+  '/client/accounting/cash-boxes': typeof ClientAccountingCashBoxesRoute
+  '/client/accounting/commissions': typeof ClientAccountingCommissionsRoute
+  '/client/accounting/contacts': typeof ClientAccountingContactsRoute
+  '/client/accounting/crm': typeof ClientAccountingCrmRoute
+  '/client/accounting/debt-overrides': typeof ClientAccountingDebtOverridesRoute
+  '/client/accounting/drafts': typeof ClientAccountingDraftsRoute
+  '/client/accounting/e-invoices': typeof ClientAccountingEInvoicesRoute
+  '/client/accounting/e-invoices-inbox': typeof ClientAccountingEInvoicesInboxRoute
+  '/client/accounting/e-invoices-settings': typeof ClientAccountingEInvoicesSettingsRoute
+  '/client/accounting/employees': typeof ClientAccountingEmployeesRoute
+  '/client/accounting/expenses': typeof ClientAccountingExpensesRoute
+  '/client/accounting/holidays': typeof ClientAccountingHolidaysRoute
+  '/client/accounting/hrm': typeof ClientAccountingHrmRoute
+  '/client/accounting/inventory': typeof ClientAccountingInventoryRoute
+  '/client/accounting/journals': typeof ClientAccountingJournalsRoute
+  '/client/accounting/leaves': typeof ClientAccountingLeavesRoute
+  '/client/accounting/ledger': typeof ClientAccountingLedgerRoute
+  '/client/accounting/locations': typeof ClientAccountingLocationsRoute
+  '/client/accounting/loyalty': typeof ClientAccountingLoyaltyRoute
+  '/client/accounting/memos': typeof ClientAccountingMemosRoute
+  '/client/accounting/messages': typeof ClientAccountingMessagesRoute
+  '/client/accounting/payroll': typeof ClientAccountingPayrollRoute
+  '/client/accounting/pos': typeof ClientAccountingPosRoute
+  '/client/accounting/purchases': typeof ClientAccountingPurchasesRoute
+  '/client/accounting/quotations': typeof ClientAccountingQuotationsRoute
+  '/client/accounting/reminders': typeof ClientAccountingRemindersRoute
+  '/client/accounting/reports': typeof ClientAccountingReportsRoute
+  '/client/accounting/salaries': typeof ClientAccountingSalariesRoute
+  '/client/accounting/sales': typeof ClientAccountingSalesRoute
+  '/client/accounting/settings': typeof ClientAccountingSettingsRoute
+  '/client/accounting/tasks': typeof ClientAccountingTasksRoute
+  '/client/ai/chat': typeof ClientAiChatRoute
+  '/client/billing/callback': typeof ClientBillingCallbackRoute
+  '/super/ai/conversations': typeof SuperAiConversationsRoute
+  '/super/ai/dashboard': typeof SuperAiDashboardRoute
+  '/super/ai/leads': typeof SuperAiLeadsRoute
+  '/super/ai/settings': typeof SuperAiSettingsRoute
+  '/super/ai/widget': typeof SuperAiWidgetRoute
+  '/super/cms/blog': typeof SuperCmsBlogRoute
+  '/super/cms/menus': typeof SuperCmsMenusRoute
+  '/super/cms/pages': typeof SuperCmsPagesRoute
+  '/client/accounting/': typeof ClientAccountingIndexRoute
+  '/client/ai/': typeof ClientAiIndexRoute
+  '/super/ai/': typeof SuperAiIndexRoute
+  '/super/cms/': typeof SuperCmsIndexRoute
+  '/api/public/einvoice/inbound': typeof ApiPublicEinvoiceInboundRoute
+  '/api/public/einvoice/status': typeof ApiPublicEinvoiceStatusRoute
+  '/api/public/widget/chat': typeof ApiPublicWidgetChatRoute
+  '/api/public/widget/embed.js': typeof ApiPublicWidgetEmbedDotjsRoute
+  '/api/public/ytj/$businessId': typeof ApiPublicYtjBusinessIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
+  '/dpa': typeof DpaRoute
+  '/features': typeof FeaturesRoute
+  '/help': typeof HelpRoute
+  '/integrations': typeof IntegrationsRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
+  '/services': typeof ServicesRoute
+  '/setup': typeof SetupRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/api/chat': typeof ApiChatRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/c/$cardNumber': typeof CCardNumberRoute
+  '/client/banking': typeof ClientBankingRoute
+  '/client/billing': typeof ClientBillingRouteWithChildren
+  '/client/documents': typeof ClientDocumentsRoute
+  '/client/firm-billing': typeof ClientFirmBillingRoute
+  '/client/insights': typeof ClientInsightsRoute
+  '/client/scan': typeof ClientScanRoute
+  '/client/settings': typeof ClientSettingsRoute
+  '/client/tickets': typeof ClientTicketsRoute
+  '/firm/audit': typeof FirmAuditRoute
+  '/firm/clients': typeof FirmClientsRoute
+  '/firm/clients-new': typeof FirmClientsNewRoute
+  '/firm/documents': typeof FirmDocumentsRoute
+  '/firm/engagements': typeof FirmEngagementsRoute
+  '/firm/invoices': typeof FirmInvoicesRoute
+  '/firm/reports': typeof FirmReportsRoute
+  '/firm/roles': typeof FirmRolesRoute
+  '/firm/settings': typeof FirmSettingsRoute
+  '/firm/staff': typeof FirmStaffRoute
+  '/firm/tasks': typeof FirmTasksRoute
+  '/firm/time': typeof FirmTimeRoute
+  '/staff/login': typeof StaffLoginRoute
+  '/super/announcements': typeof SuperAnnouncementsRoute
+  '/super/api-docs': typeof SuperApiDocsRoute
+  '/super/audit': typeof SuperAuditRoute
+  '/super/clients-new': typeof SuperClientsNewRoute
+  '/super/coupons': typeof SuperCouponsRoute
+  '/super/developer': typeof SuperDeveloperRoute
+  '/super/emails': typeof SuperEmailsRoute
+  '/super/gateways': typeof SuperGatewaysRoute
+  '/super/health': typeof SuperHealthRoute
+  '/super/invoices': typeof SuperInvoicesRoute
+  '/super/modules': typeof SuperModulesRoute
+  '/super/page-builder': typeof SuperPageBuilderRoute
+  '/super/plan-builder': typeof SuperPlanBuilderRoute
+  '/super/plans': typeof SuperPlansRoute
+  '/super/reports': typeof SuperReportsRoute
+  '/super/requests': typeof SuperRequestsRoute
+  '/super/roles': typeof SuperRolesRoute
+  '/super/security': typeof SuperSecurityRoute
+  '/super/settings': typeof SuperSettingsRoute
+  '/super/subscriptions': typeof SuperSubscriptionsRoute
+  '/super/team': typeof SuperTeamRoute
+  '/super/users': typeof SuperUsersRoute
+  '/super/webhooks': typeof SuperWebhooksRoute
+  '/super/workspaces': typeof SuperWorkspacesRoute
+  '/client': typeof ClientIndexRoute
+  '/firm': typeof FirmIndexRoute
+  '/super': typeof SuperIndexRoute
+  '/client/accounting/accounts': typeof ClientAccountingAccountsRoute
+  '/client/accounting/analytics': typeof ClientAccountingAnalyticsRoute
+  '/client/accounting/attendance': typeof ClientAccountingAttendanceRoute
+  '/client/accounting/cards': typeof ClientAccountingCardsRoute
+  '/client/accounting/cash-boxes': typeof ClientAccountingCashBoxesRoute
+  '/client/accounting/commissions': typeof ClientAccountingCommissionsRoute
+  '/client/accounting/contacts': typeof ClientAccountingContactsRoute
+  '/client/accounting/crm': typeof ClientAccountingCrmRoute
+  '/client/accounting/debt-overrides': typeof ClientAccountingDebtOverridesRoute
+  '/client/accounting/drafts': typeof ClientAccountingDraftsRoute
+  '/client/accounting/e-invoices': typeof ClientAccountingEInvoicesRoute
+  '/client/accounting/e-invoices-inbox': typeof ClientAccountingEInvoicesInboxRoute
+  '/client/accounting/e-invoices-settings': typeof ClientAccountingEInvoicesSettingsRoute
+  '/client/accounting/employees': typeof ClientAccountingEmployeesRoute
+  '/client/accounting/expenses': typeof ClientAccountingExpensesRoute
+  '/client/accounting/holidays': typeof ClientAccountingHolidaysRoute
+  '/client/accounting/hrm': typeof ClientAccountingHrmRoute
+  '/client/accounting/inventory': typeof ClientAccountingInventoryRoute
+  '/client/accounting/journals': typeof ClientAccountingJournalsRoute
+  '/client/accounting/leaves': typeof ClientAccountingLeavesRoute
+  '/client/accounting/ledger': typeof ClientAccountingLedgerRoute
+  '/client/accounting/locations': typeof ClientAccountingLocationsRoute
+  '/client/accounting/loyalty': typeof ClientAccountingLoyaltyRoute
+  '/client/accounting/memos': typeof ClientAccountingMemosRoute
+  '/client/accounting/messages': typeof ClientAccountingMessagesRoute
+  '/client/accounting/payroll': typeof ClientAccountingPayrollRoute
+  '/client/accounting/pos': typeof ClientAccountingPosRoute
+  '/client/accounting/purchases': typeof ClientAccountingPurchasesRoute
+  '/client/accounting/quotations': typeof ClientAccountingQuotationsRoute
+  '/client/accounting/reminders': typeof ClientAccountingRemindersRoute
+  '/client/accounting/reports': typeof ClientAccountingReportsRoute
+  '/client/accounting/salaries': typeof ClientAccountingSalariesRoute
+  '/client/accounting/sales': typeof ClientAccountingSalesRoute
+  '/client/accounting/settings': typeof ClientAccountingSettingsRoute
+  '/client/accounting/tasks': typeof ClientAccountingTasksRoute
+  '/client/ai/chat': typeof ClientAiChatRoute
+  '/client/billing/callback': typeof ClientBillingCallbackRoute
+  '/super/ai/conversations': typeof SuperAiConversationsRoute
+  '/super/ai/dashboard': typeof SuperAiDashboardRoute
+  '/super/ai/leads': typeof SuperAiLeadsRoute
+  '/super/ai/settings': typeof SuperAiSettingsRoute
+  '/super/ai/widget': typeof SuperAiWidgetRoute
+  '/super/cms/blog': typeof SuperCmsBlogRoute
+  '/super/cms/menus': typeof SuperCmsMenusRoute
+  '/super/cms/pages': typeof SuperCmsPagesRoute
+  '/client/accounting': typeof ClientAccountingIndexRoute
+  '/client/ai': typeof ClientAiIndexRoute
+  '/super/ai': typeof SuperAiIndexRoute
+  '/super/cms': typeof SuperCmsIndexRoute
+  '/api/public/einvoice/inbound': typeof ApiPublicEinvoiceInboundRoute
+  '/api/public/einvoice/status': typeof ApiPublicEinvoiceStatusRoute
+  '/api/public/widget/chat': typeof ApiPublicWidgetChatRoute
+  '/api/public/widget/embed.js': typeof ApiPublicWidgetEmbedDotjsRoute
+  '/api/public/ytj/$businessId': typeof ApiPublicYtjBusinessIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/client': typeof ClientRouteWithChildren
+  '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
+  '/dpa': typeof DpaRoute
+  '/features': typeof FeaturesRoute
+  '/firm': typeof FirmRouteWithChildren
+  '/help': typeof HelpRoute
+  '/integrations': typeof IntegrationsRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/security': typeof SecurityRoute
+  '/services': typeof ServicesRoute
+  '/setup': typeof SetupRoute
+  '/signup': typeof SignupRoute
+  '/super': typeof SuperRouteWithChildren
+  '/terms': typeof TermsRoute
+  '/api/chat': typeof ApiChatRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/c/$cardNumber': typeof CCardNumberRoute
+  '/client/accounting': typeof ClientAccountingRouteWithChildren
+  '/client/ai': typeof ClientAiRouteWithChildren
+  '/client/banking': typeof ClientBankingRoute
+  '/client/billing': typeof ClientBillingRouteWithChildren
+  '/client/documents': typeof ClientDocumentsRoute
+  '/client/firm-billing': typeof ClientFirmBillingRoute
+  '/client/insights': typeof ClientInsightsRoute
+  '/client/scan': typeof ClientScanRoute
+  '/client/settings': typeof ClientSettingsRoute
+  '/client/tickets': typeof ClientTicketsRoute
+  '/firm/audit': typeof FirmAuditRoute
+  '/firm/clients': typeof FirmClientsRoute
+  '/firm/clients-new': typeof FirmClientsNewRoute
+  '/firm/documents': typeof FirmDocumentsRoute
+  '/firm/engagements': typeof FirmEngagementsRoute
+  '/firm/invoices': typeof FirmInvoicesRoute
+  '/firm/reports': typeof FirmReportsRoute
+  '/firm/roles': typeof FirmRolesRoute
+  '/firm/settings': typeof FirmSettingsRoute
+  '/firm/staff': typeof FirmStaffRoute
+  '/firm/tasks': typeof FirmTasksRoute
+  '/firm/time': typeof FirmTimeRoute
+  '/staff/login': typeof StaffLoginRoute
+  '/super/ai': typeof SuperAiRouteWithChildren
+  '/super/announcements': typeof SuperAnnouncementsRoute
+  '/super/api-docs': typeof SuperApiDocsRoute
+  '/super/audit': typeof SuperAuditRoute
+  '/super/clients-new': typeof SuperClientsNewRoute
+  '/super/cms': typeof SuperCmsRouteWithChildren
+  '/super/coupons': typeof SuperCouponsRoute
+  '/super/developer': typeof SuperDeveloperRoute
+  '/super/emails': typeof SuperEmailsRoute
+  '/super/gateways': typeof SuperGatewaysRoute
+  '/super/health': typeof SuperHealthRoute
+  '/super/invoices': typeof SuperInvoicesRoute
+  '/super/modules': typeof SuperModulesRoute
+  '/super/page-builder': typeof SuperPageBuilderRoute
+  '/super/plan-builder': typeof SuperPlanBuilderRoute
+  '/super/plans': typeof SuperPlansRoute
+  '/super/reports': typeof SuperReportsRoute
+  '/super/requests': typeof SuperRequestsRoute
+  '/super/roles': typeof SuperRolesRoute
+  '/super/security': typeof SuperSecurityRoute
+  '/super/settings': typeof SuperSettingsRoute
+  '/super/subscriptions': typeof SuperSubscriptionsRoute
+  '/super/team': typeof SuperTeamRoute
+  '/super/users': typeof SuperUsersRoute
+  '/super/webhooks': typeof SuperWebhooksRoute
+  '/super/workspaces': typeof SuperWorkspacesRoute
+  '/client/': typeof ClientIndexRoute
+  '/firm/': typeof FirmIndexRoute
+  '/super/': typeof SuperIndexRoute
+  '/client/accounting/accounts': typeof ClientAccountingAccountsRoute
+  '/client/accounting/analytics': typeof ClientAccountingAnalyticsRoute
+  '/client/accounting/attendance': typeof ClientAccountingAttendanceRoute
+  '/client/accounting/cards': typeof ClientAccountingCardsRoute
+  '/client/accounting/cash-boxes': typeof ClientAccountingCashBoxesRoute
+  '/client/accounting/commissions': typeof ClientAccountingCommissionsRoute
+  '/client/accounting/contacts': typeof ClientAccountingContactsRoute
+  '/client/accounting/crm': typeof ClientAccountingCrmRoute
+  '/client/accounting/debt-overrides': typeof ClientAccountingDebtOverridesRoute
+  '/client/accounting/drafts': typeof ClientAccountingDraftsRoute
+  '/client/accounting/e-invoices': typeof ClientAccountingEInvoicesRoute
+  '/client/accounting/e-invoices-inbox': typeof ClientAccountingEInvoicesInboxRoute
+  '/client/accounting/e-invoices-settings': typeof ClientAccountingEInvoicesSettingsRoute
+  '/client/accounting/employees': typeof ClientAccountingEmployeesRoute
+  '/client/accounting/expenses': typeof ClientAccountingExpensesRoute
+  '/client/accounting/holidays': typeof ClientAccountingHolidaysRoute
+  '/client/accounting/hrm': typeof ClientAccountingHrmRoute
+  '/client/accounting/inventory': typeof ClientAccountingInventoryRoute
+  '/client/accounting/journals': typeof ClientAccountingJournalsRoute
+  '/client/accounting/leaves': typeof ClientAccountingLeavesRoute
+  '/client/accounting/ledger': typeof ClientAccountingLedgerRoute
+  '/client/accounting/locations': typeof ClientAccountingLocationsRoute
+  '/client/accounting/loyalty': typeof ClientAccountingLoyaltyRoute
+  '/client/accounting/memos': typeof ClientAccountingMemosRoute
+  '/client/accounting/messages': typeof ClientAccountingMessagesRoute
+  '/client/accounting/payroll': typeof ClientAccountingPayrollRoute
+  '/client/accounting/pos': typeof ClientAccountingPosRoute
+  '/client/accounting/purchases': typeof ClientAccountingPurchasesRoute
+  '/client/accounting/quotations': typeof ClientAccountingQuotationsRoute
+  '/client/accounting/reminders': typeof ClientAccountingRemindersRoute
+  '/client/accounting/reports': typeof ClientAccountingReportsRoute
+  '/client/accounting/salaries': typeof ClientAccountingSalariesRoute
+  '/client/accounting/sales': typeof ClientAccountingSalesRoute
+  '/client/accounting/settings': typeof ClientAccountingSettingsRoute
+  '/client/accounting/tasks': typeof ClientAccountingTasksRoute
+  '/client/ai/chat': typeof ClientAiChatRoute
+  '/client/billing/callback': typeof ClientBillingCallbackRoute
+  '/super/ai/conversations': typeof SuperAiConversationsRoute
+  '/super/ai/dashboard': typeof SuperAiDashboardRoute
+  '/super/ai/leads': typeof SuperAiLeadsRoute
+  '/super/ai/settings': typeof SuperAiSettingsRoute
+  '/super/ai/widget': typeof SuperAiWidgetRoute
+  '/super/cms/blog': typeof SuperCmsBlogRoute
+  '/super/cms/menus': typeof SuperCmsMenusRoute
+  '/super/cms/pages': typeof SuperCmsPagesRoute
+  '/client/accounting/': typeof ClientAccountingIndexRoute
+  '/client/ai/': typeof ClientAiIndexRoute
+  '/super/ai/': typeof SuperAiIndexRoute
+  '/super/cms/': typeof SuperCmsIndexRoute
+  '/api/public/einvoice/inbound': typeof ApiPublicEinvoiceInboundRoute
+  '/api/public/einvoice/status': typeof ApiPublicEinvoiceStatusRoute
+  '/api/public/widget/chat': typeof ApiPublicWidgetChatRoute
+  '/api/public/widget/embed.js': typeof ApiPublicWidgetEmbedDotjsRoute
+  '/api/public/ytj/$businessId': typeof ApiPublicYtjBusinessIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/blog'
+    | '/client'
+    | '/contact'
+    | '/cookies'
+    | '/dpa'
+    | '/features'
+    | '/firm'
+    | '/help'
+    | '/integrations'
+    | '/login'
+    | '/onboarding'
+    | '/pricing'
+    | '/privacy'
+    | '/security'
+    | '/services'
+    | '/setup'
+    | '/signup'
+    | '/super'
+    | '/terms'
+    | '/api/chat'
+    | '/blog/$slug'
+    | '/c/$cardNumber'
+    | '/client/accounting'
+    | '/client/ai'
+    | '/client/banking'
+    | '/client/billing'
+    | '/client/documents'
+    | '/client/firm-billing'
+    | '/client/insights'
+    | '/client/scan'
+    | '/client/settings'
+    | '/client/tickets'
+    | '/firm/audit'
+    | '/firm/clients'
+    | '/firm/clients-new'
+    | '/firm/documents'
+    | '/firm/engagements'
+    | '/firm/invoices'
+    | '/firm/reports'
+    | '/firm/roles'
+    | '/firm/settings'
+    | '/firm/staff'
+    | '/firm/tasks'
+    | '/firm/time'
+    | '/staff/login'
+    | '/super/ai'
+    | '/super/announcements'
+    | '/super/api-docs'
+    | '/super/audit'
+    | '/super/clients-new'
+    | '/super/cms'
+    | '/super/coupons'
+    | '/super/developer'
+    | '/super/emails'
+    | '/super/gateways'
+    | '/super/health'
+    | '/super/invoices'
+    | '/super/modules'
+    | '/super/page-builder'
+    | '/super/plan-builder'
+    | '/super/plans'
+    | '/super/reports'
+    | '/super/requests'
+    | '/super/roles'
+    | '/super/security'
+    | '/super/settings'
+    | '/super/subscriptions'
+    | '/super/team'
+    | '/super/users'
+    | '/super/webhooks'
+    | '/super/workspaces'
+    | '/client/'
+    | '/firm/'
+    | '/super/'
+    | '/client/accounting/accounts'
+    | '/client/accounting/analytics'
+    | '/client/accounting/attendance'
+    | '/client/accounting/cards'
+    | '/client/accounting/cash-boxes'
+    | '/client/accounting/commissions'
+    | '/client/accounting/contacts'
+    | '/client/accounting/crm'
+    | '/client/accounting/debt-overrides'
+    | '/client/accounting/drafts'
+    | '/client/accounting/e-invoices'
+    | '/client/accounting/e-invoices-inbox'
+    | '/client/accounting/e-invoices-settings'
+    | '/client/accounting/employees'
+    | '/client/accounting/expenses'
+    | '/client/accounting/holidays'
+    | '/client/accounting/hrm'
+    | '/client/accounting/inventory'
+    | '/client/accounting/journals'
+    | '/client/accounting/leaves'
+    | '/client/accounting/ledger'
+    | '/client/accounting/locations'
+    | '/client/accounting/loyalty'
+    | '/client/accounting/memos'
+    | '/client/accounting/messages'
+    | '/client/accounting/payroll'
+    | '/client/accounting/pos'
+    | '/client/accounting/purchases'
+    | '/client/accounting/quotations'
+    | '/client/accounting/reminders'
+    | '/client/accounting/reports'
+    | '/client/accounting/salaries'
+    | '/client/accounting/sales'
+    | '/client/accounting/settings'
+    | '/client/accounting/tasks'
+    | '/client/ai/chat'
+    | '/client/billing/callback'
+    | '/super/ai/conversations'
+    | '/super/ai/dashboard'
+    | '/super/ai/leads'
+    | '/super/ai/settings'
+    | '/super/ai/widget'
+    | '/super/cms/blog'
+    | '/super/cms/menus'
+    | '/super/cms/pages'
+    | '/client/accounting/'
+    | '/client/ai/'
+    | '/super/ai/'
+    | '/super/cms/'
+    | '/api/public/einvoice/inbound'
+    | '/api/public/einvoice/status'
+    | '/api/public/widget/chat'
+    | '/api/public/widget/embed.js'
+    | '/api/public/ytj/$businessId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/blog'
+    | '/contact'
+    | '/cookies'
+    | '/dpa'
+    | '/features'
+    | '/help'
+    | '/integrations'
+    | '/login'
+    | '/onboarding'
+    | '/pricing'
+    | '/privacy'
+    | '/security'
+    | '/services'
+    | '/setup'
+    | '/signup'
+    | '/terms'
+    | '/api/chat'
+    | '/blog/$slug'
+    | '/c/$cardNumber'
+    | '/client/banking'
+    | '/client/billing'
+    | '/client/documents'
+    | '/client/firm-billing'
+    | '/client/insights'
+    | '/client/scan'
+    | '/client/settings'
+    | '/client/tickets'
+    | '/firm/audit'
+    | '/firm/clients'
+    | '/firm/clients-new'
+    | '/firm/documents'
+    | '/firm/engagements'
+    | '/firm/invoices'
+    | '/firm/reports'
+    | '/firm/roles'
+    | '/firm/settings'
+    | '/firm/staff'
+    | '/firm/tasks'
+    | '/firm/time'
+    | '/staff/login'
+    | '/super/announcements'
+    | '/super/api-docs'
+    | '/super/audit'
+    | '/super/clients-new'
+    | '/super/coupons'
+    | '/super/developer'
+    | '/super/emails'
+    | '/super/gateways'
+    | '/super/health'
+    | '/super/invoices'
+    | '/super/modules'
+    | '/super/page-builder'
+    | '/super/plan-builder'
+    | '/super/plans'
+    | '/super/reports'
+    | '/super/requests'
+    | '/super/roles'
+    | '/super/security'
+    | '/super/settings'
+    | '/super/subscriptions'
+    | '/super/team'
+    | '/super/users'
+    | '/super/webhooks'
+    | '/super/workspaces'
+    | '/client'
+    | '/firm'
+    | '/super'
+    | '/client/accounting/accounts'
+    | '/client/accounting/analytics'
+    | '/client/accounting/attendance'
+    | '/client/accounting/cards'
+    | '/client/accounting/cash-boxes'
+    | '/client/accounting/commissions'
+    | '/client/accounting/contacts'
+    | '/client/accounting/crm'
+    | '/client/accounting/debt-overrides'
+    | '/client/accounting/drafts'
+    | '/client/accounting/e-invoices'
+    | '/client/accounting/e-invoices-inbox'
+    | '/client/accounting/e-invoices-settings'
+    | '/client/accounting/employees'
+    | '/client/accounting/expenses'
+    | '/client/accounting/holidays'
+    | '/client/accounting/hrm'
+    | '/client/accounting/inventory'
+    | '/client/accounting/journals'
+    | '/client/accounting/leaves'
+    | '/client/accounting/ledger'
+    | '/client/accounting/locations'
+    | '/client/accounting/loyalty'
+    | '/client/accounting/memos'
+    | '/client/accounting/messages'
+    | '/client/accounting/payroll'
+    | '/client/accounting/pos'
+    | '/client/accounting/purchases'
+    | '/client/accounting/quotations'
+    | '/client/accounting/reminders'
+    | '/client/accounting/reports'
+    | '/client/accounting/salaries'
+    | '/client/accounting/sales'
+    | '/client/accounting/settings'
+    | '/client/accounting/tasks'
+    | '/client/ai/chat'
+    | '/client/billing/callback'
+    | '/super/ai/conversations'
+    | '/super/ai/dashboard'
+    | '/super/ai/leads'
+    | '/super/ai/settings'
+    | '/super/ai/widget'
+    | '/super/cms/blog'
+    | '/super/cms/menus'
+    | '/super/cms/pages'
+    | '/client/accounting'
+    | '/client/ai'
+    | '/super/ai'
+    | '/super/cms'
+    | '/api/public/einvoice/inbound'
+    | '/api/public/einvoice/status'
+    | '/api/public/widget/chat'
+    | '/api/public/widget/embed.js'
+    | '/api/public/ytj/$businessId'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/blog'
+    | '/client'
+    | '/contact'
+    | '/cookies'
+    | '/dpa'
+    | '/features'
+    | '/firm'
+    | '/help'
+    | '/integrations'
+    | '/login'
+    | '/onboarding'
+    | '/pricing'
+    | '/privacy'
+    | '/security'
+    | '/services'
+    | '/setup'
+    | '/signup'
+    | '/super'
+    | '/terms'
+    | '/api/chat'
+    | '/blog/$slug'
+    | '/c/$cardNumber'
+    | '/client/accounting'
+    | '/client/ai'
+    | '/client/banking'
+    | '/client/billing'
+    | '/client/documents'
+    | '/client/firm-billing'
+    | '/client/insights'
+    | '/client/scan'
+    | '/client/settings'
+    | '/client/tickets'
+    | '/firm/audit'
+    | '/firm/clients'
+    | '/firm/clients-new'
+    | '/firm/documents'
+    | '/firm/engagements'
+    | '/firm/invoices'
+    | '/firm/reports'
+    | '/firm/roles'
+    | '/firm/settings'
+    | '/firm/staff'
+    | '/firm/tasks'
+    | '/firm/time'
+    | '/staff/login'
+    | '/super/ai'
+    | '/super/announcements'
+    | '/super/api-docs'
+    | '/super/audit'
+    | '/super/clients-new'
+    | '/super/cms'
+    | '/super/coupons'
+    | '/super/developer'
+    | '/super/emails'
+    | '/super/gateways'
+    | '/super/health'
+    | '/super/invoices'
+    | '/super/modules'
+    | '/super/page-builder'
+    | '/super/plan-builder'
+    | '/super/plans'
+    | '/super/reports'
+    | '/super/requests'
+    | '/super/roles'
+    | '/super/security'
+    | '/super/settings'
+    | '/super/subscriptions'
+    | '/super/team'
+    | '/super/users'
+    | '/super/webhooks'
+    | '/super/workspaces'
+    | '/client/'
+    | '/firm/'
+    | '/super/'
+    | '/client/accounting/accounts'
+    | '/client/accounting/analytics'
+    | '/client/accounting/attendance'
+    | '/client/accounting/cards'
+    | '/client/accounting/cash-boxes'
+    | '/client/accounting/commissions'
+    | '/client/accounting/contacts'
+    | '/client/accounting/crm'
+    | '/client/accounting/debt-overrides'
+    | '/client/accounting/drafts'
+    | '/client/accounting/e-invoices'
+    | '/client/accounting/e-invoices-inbox'
+    | '/client/accounting/e-invoices-settings'
+    | '/client/accounting/employees'
+    | '/client/accounting/expenses'
+    | '/client/accounting/holidays'
+    | '/client/accounting/hrm'
+    | '/client/accounting/inventory'
+    | '/client/accounting/journals'
+    | '/client/accounting/leaves'
+    | '/client/accounting/ledger'
+    | '/client/accounting/locations'
+    | '/client/accounting/loyalty'
+    | '/client/accounting/memos'
+    | '/client/accounting/messages'
+    | '/client/accounting/payroll'
+    | '/client/accounting/pos'
+    | '/client/accounting/purchases'
+    | '/client/accounting/quotations'
+    | '/client/accounting/reminders'
+    | '/client/accounting/reports'
+    | '/client/accounting/salaries'
+    | '/client/accounting/sales'
+    | '/client/accounting/settings'
+    | '/client/accounting/tasks'
+    | '/client/ai/chat'
+    | '/client/billing/callback'
+    | '/super/ai/conversations'
+    | '/super/ai/dashboard'
+    | '/super/ai/leads'
+    | '/super/ai/settings'
+    | '/super/ai/widget'
+    | '/super/cms/blog'
+    | '/super/cms/menus'
+    | '/super/cms/pages'
+    | '/client/accounting/'
+    | '/client/ai/'
+    | '/super/ai/'
+    | '/super/cms/'
+    | '/api/public/einvoice/inbound'
+    | '/api/public/einvoice/status'
+    | '/api/public/widget/chat'
+    | '/api/public/widget/embed.js'
+    | '/api/public/ytj/$businessId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
+  BlogRoute: typeof BlogRouteWithChildren
+  ClientRoute: typeof ClientRouteWithChildren
+  ContactRoute: typeof ContactRoute
+  CookiesRoute: typeof CookiesRoute
+  DpaRoute: typeof DpaRoute
+  FeaturesRoute: typeof FeaturesRoute
+  FirmRoute: typeof FirmRouteWithChildren
+  HelpRoute: typeof HelpRoute
+  IntegrationsRoute: typeof IntegrationsRoute
+  LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
+  PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
+  SecurityRoute: typeof SecurityRoute
+  ServicesRoute: typeof ServicesRoute
+  SetupRoute: typeof SetupRoute
+  SignupRoute: typeof SignupRoute
+  SuperRoute: typeof SuperRouteWithChildren
+  TermsRoute: typeof TermsRoute
+  ApiChatRoute: typeof ApiChatRoute
+  CCardNumberRoute: typeof CCardNumberRoute
+  StaffLoginRoute: typeof StaffLoginRoute
+  ApiPublicEinvoiceInboundRoute: typeof ApiPublicEinvoiceInboundRoute
+  ApiPublicEinvoiceStatusRoute: typeof ApiPublicEinvoiceStatusRoute
+  ApiPublicWidgetChatRoute: typeof ApiPublicWidgetChatRoute
+  ApiPublicWidgetEmbedDotjsRoute: typeof ApiPublicWidgetEmbedDotjsRoute
+  ApiPublicYtjBusinessIdRoute: typeof ApiPublicYtjBusinessIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/super': {
+      id: '/super'
+      path: '/super'
+      fullPath: '/super'
+      preLoaderRoute: typeof SuperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup': {
+      id: '/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/firm': {
+      id: '/firm'
+      path: '/firm'
+      fullPath: '/firm'
+      preLoaderRoute: typeof FirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/features': {
+      id: '/features'
+      path: '/features'
+      fullPath: '/features'
+      preLoaderRoute: typeof FeaturesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dpa': {
+      id: '/dpa'
+      path: '/dpa'
+      fullPath: '/dpa'
+      preLoaderRoute: typeof DpaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client': {
+      id: '/client'
+      path: '/client'
+      fullPath: '/client'
+      preLoaderRoute: typeof ClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +1798,1088 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/super/': {
+      id: '/super/'
+      path: '/'
+      fullPath: '/super/'
+      preLoaderRoute: typeof SuperIndexRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/firm/': {
+      id: '/firm/'
+      path: '/'
+      fullPath: '/firm/'
+      preLoaderRoute: typeof FirmIndexRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/client/': {
+      id: '/client/'
+      path: '/'
+      fullPath: '/client/'
+      preLoaderRoute: typeof ClientIndexRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/super/workspaces': {
+      id: '/super/workspaces'
+      path: '/workspaces'
+      fullPath: '/super/workspaces'
+      preLoaderRoute: typeof SuperWorkspacesRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/webhooks': {
+      id: '/super/webhooks'
+      path: '/webhooks'
+      fullPath: '/super/webhooks'
+      preLoaderRoute: typeof SuperWebhooksRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/users': {
+      id: '/super/users'
+      path: '/users'
+      fullPath: '/super/users'
+      preLoaderRoute: typeof SuperUsersRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/team': {
+      id: '/super/team'
+      path: '/team'
+      fullPath: '/super/team'
+      preLoaderRoute: typeof SuperTeamRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/subscriptions': {
+      id: '/super/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/super/subscriptions'
+      preLoaderRoute: typeof SuperSubscriptionsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/settings': {
+      id: '/super/settings'
+      path: '/settings'
+      fullPath: '/super/settings'
+      preLoaderRoute: typeof SuperSettingsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/security': {
+      id: '/super/security'
+      path: '/security'
+      fullPath: '/super/security'
+      preLoaderRoute: typeof SuperSecurityRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/roles': {
+      id: '/super/roles'
+      path: '/roles'
+      fullPath: '/super/roles'
+      preLoaderRoute: typeof SuperRolesRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/requests': {
+      id: '/super/requests'
+      path: '/requests'
+      fullPath: '/super/requests'
+      preLoaderRoute: typeof SuperRequestsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/reports': {
+      id: '/super/reports'
+      path: '/reports'
+      fullPath: '/super/reports'
+      preLoaderRoute: typeof SuperReportsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/plans': {
+      id: '/super/plans'
+      path: '/plans'
+      fullPath: '/super/plans'
+      preLoaderRoute: typeof SuperPlansRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/plan-builder': {
+      id: '/super/plan-builder'
+      path: '/plan-builder'
+      fullPath: '/super/plan-builder'
+      preLoaderRoute: typeof SuperPlanBuilderRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/page-builder': {
+      id: '/super/page-builder'
+      path: '/page-builder'
+      fullPath: '/super/page-builder'
+      preLoaderRoute: typeof SuperPageBuilderRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/modules': {
+      id: '/super/modules'
+      path: '/modules'
+      fullPath: '/super/modules'
+      preLoaderRoute: typeof SuperModulesRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/invoices': {
+      id: '/super/invoices'
+      path: '/invoices'
+      fullPath: '/super/invoices'
+      preLoaderRoute: typeof SuperInvoicesRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/health': {
+      id: '/super/health'
+      path: '/health'
+      fullPath: '/super/health'
+      preLoaderRoute: typeof SuperHealthRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/gateways': {
+      id: '/super/gateways'
+      path: '/gateways'
+      fullPath: '/super/gateways'
+      preLoaderRoute: typeof SuperGatewaysRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/emails': {
+      id: '/super/emails'
+      path: '/emails'
+      fullPath: '/super/emails'
+      preLoaderRoute: typeof SuperEmailsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/developer': {
+      id: '/super/developer'
+      path: '/developer'
+      fullPath: '/super/developer'
+      preLoaderRoute: typeof SuperDeveloperRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/coupons': {
+      id: '/super/coupons'
+      path: '/coupons'
+      fullPath: '/super/coupons'
+      preLoaderRoute: typeof SuperCouponsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/cms': {
+      id: '/super/cms'
+      path: '/cms'
+      fullPath: '/super/cms'
+      preLoaderRoute: typeof SuperCmsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/clients-new': {
+      id: '/super/clients-new'
+      path: '/clients-new'
+      fullPath: '/super/clients-new'
+      preLoaderRoute: typeof SuperClientsNewRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/audit': {
+      id: '/super/audit'
+      path: '/audit'
+      fullPath: '/super/audit'
+      preLoaderRoute: typeof SuperAuditRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/api-docs': {
+      id: '/super/api-docs'
+      path: '/api-docs'
+      fullPath: '/super/api-docs'
+      preLoaderRoute: typeof SuperApiDocsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/announcements': {
+      id: '/super/announcements'
+      path: '/announcements'
+      fullPath: '/super/announcements'
+      preLoaderRoute: typeof SuperAnnouncementsRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/super/ai': {
+      id: '/super/ai'
+      path: '/ai'
+      fullPath: '/super/ai'
+      preLoaderRoute: typeof SuperAiRouteImport
+      parentRoute: typeof SuperRoute
+    }
+    '/staff/login': {
+      id: '/staff/login'
+      path: '/staff/login'
+      fullPath: '/staff/login'
+      preLoaderRoute: typeof StaffLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/firm/time': {
+      id: '/firm/time'
+      path: '/time'
+      fullPath: '/firm/time'
+      preLoaderRoute: typeof FirmTimeRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/tasks': {
+      id: '/firm/tasks'
+      path: '/tasks'
+      fullPath: '/firm/tasks'
+      preLoaderRoute: typeof FirmTasksRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/staff': {
+      id: '/firm/staff'
+      path: '/staff'
+      fullPath: '/firm/staff'
+      preLoaderRoute: typeof FirmStaffRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/settings': {
+      id: '/firm/settings'
+      path: '/settings'
+      fullPath: '/firm/settings'
+      preLoaderRoute: typeof FirmSettingsRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/roles': {
+      id: '/firm/roles'
+      path: '/roles'
+      fullPath: '/firm/roles'
+      preLoaderRoute: typeof FirmRolesRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/reports': {
+      id: '/firm/reports'
+      path: '/reports'
+      fullPath: '/firm/reports'
+      preLoaderRoute: typeof FirmReportsRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/invoices': {
+      id: '/firm/invoices'
+      path: '/invoices'
+      fullPath: '/firm/invoices'
+      preLoaderRoute: typeof FirmInvoicesRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/engagements': {
+      id: '/firm/engagements'
+      path: '/engagements'
+      fullPath: '/firm/engagements'
+      preLoaderRoute: typeof FirmEngagementsRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/documents': {
+      id: '/firm/documents'
+      path: '/documents'
+      fullPath: '/firm/documents'
+      preLoaderRoute: typeof FirmDocumentsRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/clients-new': {
+      id: '/firm/clients-new'
+      path: '/clients-new'
+      fullPath: '/firm/clients-new'
+      preLoaderRoute: typeof FirmClientsNewRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/clients': {
+      id: '/firm/clients'
+      path: '/clients'
+      fullPath: '/firm/clients'
+      preLoaderRoute: typeof FirmClientsRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/firm/audit': {
+      id: '/firm/audit'
+      path: '/audit'
+      fullPath: '/firm/audit'
+      preLoaderRoute: typeof FirmAuditRouteImport
+      parentRoute: typeof FirmRoute
+    }
+    '/client/tickets': {
+      id: '/client/tickets'
+      path: '/tickets'
+      fullPath: '/client/tickets'
+      preLoaderRoute: typeof ClientTicketsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/settings': {
+      id: '/client/settings'
+      path: '/settings'
+      fullPath: '/client/settings'
+      preLoaderRoute: typeof ClientSettingsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/scan': {
+      id: '/client/scan'
+      path: '/scan'
+      fullPath: '/client/scan'
+      preLoaderRoute: typeof ClientScanRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/insights': {
+      id: '/client/insights'
+      path: '/insights'
+      fullPath: '/client/insights'
+      preLoaderRoute: typeof ClientInsightsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/firm-billing': {
+      id: '/client/firm-billing'
+      path: '/firm-billing'
+      fullPath: '/client/firm-billing'
+      preLoaderRoute: typeof ClientFirmBillingRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/documents': {
+      id: '/client/documents'
+      path: '/documents'
+      fullPath: '/client/documents'
+      preLoaderRoute: typeof ClientDocumentsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/billing': {
+      id: '/client/billing'
+      path: '/billing'
+      fullPath: '/client/billing'
+      preLoaderRoute: typeof ClientBillingRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/banking': {
+      id: '/client/banking'
+      path: '/banking'
+      fullPath: '/client/banking'
+      preLoaderRoute: typeof ClientBankingRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/ai': {
+      id: '/client/ai'
+      path: '/ai'
+      fullPath: '/client/ai'
+      preLoaderRoute: typeof ClientAiRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/accounting': {
+      id: '/client/accounting'
+      path: '/accounting'
+      fullPath: '/client/accounting'
+      preLoaderRoute: typeof ClientAccountingRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/c/$cardNumber': {
+      id: '/c/$cardNumber'
+      path: '/c/$cardNumber'
+      fullPath: '/c/$cardNumber'
+      preLoaderRoute: typeof CCardNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/super/cms/': {
+      id: '/super/cms/'
+      path: '/'
+      fullPath: '/super/cms/'
+      preLoaderRoute: typeof SuperCmsIndexRouteImport
+      parentRoute: typeof SuperCmsRoute
+    }
+    '/super/ai/': {
+      id: '/super/ai/'
+      path: '/'
+      fullPath: '/super/ai/'
+      preLoaderRoute: typeof SuperAiIndexRouteImport
+      parentRoute: typeof SuperAiRoute
+    }
+    '/client/ai/': {
+      id: '/client/ai/'
+      path: '/'
+      fullPath: '/client/ai/'
+      preLoaderRoute: typeof ClientAiIndexRouteImport
+      parentRoute: typeof ClientAiRoute
+    }
+    '/client/accounting/': {
+      id: '/client/accounting/'
+      path: '/'
+      fullPath: '/client/accounting/'
+      preLoaderRoute: typeof ClientAccountingIndexRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/super/cms/pages': {
+      id: '/super/cms/pages'
+      path: '/pages'
+      fullPath: '/super/cms/pages'
+      preLoaderRoute: typeof SuperCmsPagesRouteImport
+      parentRoute: typeof SuperCmsRoute
+    }
+    '/super/cms/menus': {
+      id: '/super/cms/menus'
+      path: '/menus'
+      fullPath: '/super/cms/menus'
+      preLoaderRoute: typeof SuperCmsMenusRouteImport
+      parentRoute: typeof SuperCmsRoute
+    }
+    '/super/cms/blog': {
+      id: '/super/cms/blog'
+      path: '/blog'
+      fullPath: '/super/cms/blog'
+      preLoaderRoute: typeof SuperCmsBlogRouteImport
+      parentRoute: typeof SuperCmsRoute
+    }
+    '/super/ai/widget': {
+      id: '/super/ai/widget'
+      path: '/widget'
+      fullPath: '/super/ai/widget'
+      preLoaderRoute: typeof SuperAiWidgetRouteImport
+      parentRoute: typeof SuperAiRoute
+    }
+    '/super/ai/settings': {
+      id: '/super/ai/settings'
+      path: '/settings'
+      fullPath: '/super/ai/settings'
+      preLoaderRoute: typeof SuperAiSettingsRouteImport
+      parentRoute: typeof SuperAiRoute
+    }
+    '/super/ai/leads': {
+      id: '/super/ai/leads'
+      path: '/leads'
+      fullPath: '/super/ai/leads'
+      preLoaderRoute: typeof SuperAiLeadsRouteImport
+      parentRoute: typeof SuperAiRoute
+    }
+    '/super/ai/dashboard': {
+      id: '/super/ai/dashboard'
+      path: '/dashboard'
+      fullPath: '/super/ai/dashboard'
+      preLoaderRoute: typeof SuperAiDashboardRouteImport
+      parentRoute: typeof SuperAiRoute
+    }
+    '/super/ai/conversations': {
+      id: '/super/ai/conversations'
+      path: '/conversations'
+      fullPath: '/super/ai/conversations'
+      preLoaderRoute: typeof SuperAiConversationsRouteImport
+      parentRoute: typeof SuperAiRoute
+    }
+    '/client/billing/callback': {
+      id: '/client/billing/callback'
+      path: '/callback'
+      fullPath: '/client/billing/callback'
+      preLoaderRoute: typeof ClientBillingCallbackRouteImport
+      parentRoute: typeof ClientBillingRoute
+    }
+    '/client/ai/chat': {
+      id: '/client/ai/chat'
+      path: '/chat'
+      fullPath: '/client/ai/chat'
+      preLoaderRoute: typeof ClientAiChatRouteImport
+      parentRoute: typeof ClientAiRoute
+    }
+    '/client/accounting/tasks': {
+      id: '/client/accounting/tasks'
+      path: '/tasks'
+      fullPath: '/client/accounting/tasks'
+      preLoaderRoute: typeof ClientAccountingTasksRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/settings': {
+      id: '/client/accounting/settings'
+      path: '/settings'
+      fullPath: '/client/accounting/settings'
+      preLoaderRoute: typeof ClientAccountingSettingsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/sales': {
+      id: '/client/accounting/sales'
+      path: '/sales'
+      fullPath: '/client/accounting/sales'
+      preLoaderRoute: typeof ClientAccountingSalesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/salaries': {
+      id: '/client/accounting/salaries'
+      path: '/salaries'
+      fullPath: '/client/accounting/salaries'
+      preLoaderRoute: typeof ClientAccountingSalariesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/reports': {
+      id: '/client/accounting/reports'
+      path: '/reports'
+      fullPath: '/client/accounting/reports'
+      preLoaderRoute: typeof ClientAccountingReportsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/reminders': {
+      id: '/client/accounting/reminders'
+      path: '/reminders'
+      fullPath: '/client/accounting/reminders'
+      preLoaderRoute: typeof ClientAccountingRemindersRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/quotations': {
+      id: '/client/accounting/quotations'
+      path: '/quotations'
+      fullPath: '/client/accounting/quotations'
+      preLoaderRoute: typeof ClientAccountingQuotationsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/purchases': {
+      id: '/client/accounting/purchases'
+      path: '/purchases'
+      fullPath: '/client/accounting/purchases'
+      preLoaderRoute: typeof ClientAccountingPurchasesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/pos': {
+      id: '/client/accounting/pos'
+      path: '/pos'
+      fullPath: '/client/accounting/pos'
+      preLoaderRoute: typeof ClientAccountingPosRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/payroll': {
+      id: '/client/accounting/payroll'
+      path: '/payroll'
+      fullPath: '/client/accounting/payroll'
+      preLoaderRoute: typeof ClientAccountingPayrollRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/messages': {
+      id: '/client/accounting/messages'
+      path: '/messages'
+      fullPath: '/client/accounting/messages'
+      preLoaderRoute: typeof ClientAccountingMessagesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/memos': {
+      id: '/client/accounting/memos'
+      path: '/memos'
+      fullPath: '/client/accounting/memos'
+      preLoaderRoute: typeof ClientAccountingMemosRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/loyalty': {
+      id: '/client/accounting/loyalty'
+      path: '/loyalty'
+      fullPath: '/client/accounting/loyalty'
+      preLoaderRoute: typeof ClientAccountingLoyaltyRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/locations': {
+      id: '/client/accounting/locations'
+      path: '/locations'
+      fullPath: '/client/accounting/locations'
+      preLoaderRoute: typeof ClientAccountingLocationsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/ledger': {
+      id: '/client/accounting/ledger'
+      path: '/ledger'
+      fullPath: '/client/accounting/ledger'
+      preLoaderRoute: typeof ClientAccountingLedgerRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/leaves': {
+      id: '/client/accounting/leaves'
+      path: '/leaves'
+      fullPath: '/client/accounting/leaves'
+      preLoaderRoute: typeof ClientAccountingLeavesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/journals': {
+      id: '/client/accounting/journals'
+      path: '/journals'
+      fullPath: '/client/accounting/journals'
+      preLoaderRoute: typeof ClientAccountingJournalsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/inventory': {
+      id: '/client/accounting/inventory'
+      path: '/inventory'
+      fullPath: '/client/accounting/inventory'
+      preLoaderRoute: typeof ClientAccountingInventoryRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/hrm': {
+      id: '/client/accounting/hrm'
+      path: '/hrm'
+      fullPath: '/client/accounting/hrm'
+      preLoaderRoute: typeof ClientAccountingHrmRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/holidays': {
+      id: '/client/accounting/holidays'
+      path: '/holidays'
+      fullPath: '/client/accounting/holidays'
+      preLoaderRoute: typeof ClientAccountingHolidaysRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/expenses': {
+      id: '/client/accounting/expenses'
+      path: '/expenses'
+      fullPath: '/client/accounting/expenses'
+      preLoaderRoute: typeof ClientAccountingExpensesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/employees': {
+      id: '/client/accounting/employees'
+      path: '/employees'
+      fullPath: '/client/accounting/employees'
+      preLoaderRoute: typeof ClientAccountingEmployeesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/e-invoices-settings': {
+      id: '/client/accounting/e-invoices-settings'
+      path: '/e-invoices-settings'
+      fullPath: '/client/accounting/e-invoices-settings'
+      preLoaderRoute: typeof ClientAccountingEInvoicesSettingsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/e-invoices-inbox': {
+      id: '/client/accounting/e-invoices-inbox'
+      path: '/e-invoices-inbox'
+      fullPath: '/client/accounting/e-invoices-inbox'
+      preLoaderRoute: typeof ClientAccountingEInvoicesInboxRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/e-invoices': {
+      id: '/client/accounting/e-invoices'
+      path: '/e-invoices'
+      fullPath: '/client/accounting/e-invoices'
+      preLoaderRoute: typeof ClientAccountingEInvoicesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/drafts': {
+      id: '/client/accounting/drafts'
+      path: '/drafts'
+      fullPath: '/client/accounting/drafts'
+      preLoaderRoute: typeof ClientAccountingDraftsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/debt-overrides': {
+      id: '/client/accounting/debt-overrides'
+      path: '/debt-overrides'
+      fullPath: '/client/accounting/debt-overrides'
+      preLoaderRoute: typeof ClientAccountingDebtOverridesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/crm': {
+      id: '/client/accounting/crm'
+      path: '/crm'
+      fullPath: '/client/accounting/crm'
+      preLoaderRoute: typeof ClientAccountingCrmRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/contacts': {
+      id: '/client/accounting/contacts'
+      path: '/contacts'
+      fullPath: '/client/accounting/contacts'
+      preLoaderRoute: typeof ClientAccountingContactsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/commissions': {
+      id: '/client/accounting/commissions'
+      path: '/commissions'
+      fullPath: '/client/accounting/commissions'
+      preLoaderRoute: typeof ClientAccountingCommissionsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/cash-boxes': {
+      id: '/client/accounting/cash-boxes'
+      path: '/cash-boxes'
+      fullPath: '/client/accounting/cash-boxes'
+      preLoaderRoute: typeof ClientAccountingCashBoxesRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/cards': {
+      id: '/client/accounting/cards'
+      path: '/cards'
+      fullPath: '/client/accounting/cards'
+      preLoaderRoute: typeof ClientAccountingCardsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/attendance': {
+      id: '/client/accounting/attendance'
+      path: '/attendance'
+      fullPath: '/client/accounting/attendance'
+      preLoaderRoute: typeof ClientAccountingAttendanceRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/analytics': {
+      id: '/client/accounting/analytics'
+      path: '/analytics'
+      fullPath: '/client/accounting/analytics'
+      preLoaderRoute: typeof ClientAccountingAnalyticsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/client/accounting/accounts': {
+      id: '/client/accounting/accounts'
+      path: '/accounts'
+      fullPath: '/client/accounting/accounts'
+      preLoaderRoute: typeof ClientAccountingAccountsRouteImport
+      parentRoute: typeof ClientAccountingRoute
+    }
+    '/api/public/ytj/$businessId': {
+      id: '/api/public/ytj/$businessId'
+      path: '/api/public/ytj/$businessId'
+      fullPath: '/api/public/ytj/$businessId'
+      preLoaderRoute: typeof ApiPublicYtjBusinessIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/widget/embed.js': {
+      id: '/api/public/widget/embed.js'
+      path: '/api/public/widget/embed.js'
+      fullPath: '/api/public/widget/embed.js'
+      preLoaderRoute: typeof ApiPublicWidgetEmbedDotjsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/widget/chat': {
+      id: '/api/public/widget/chat'
+      path: '/api/public/widget/chat'
+      fullPath: '/api/public/widget/chat'
+      preLoaderRoute: typeof ApiPublicWidgetChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/einvoice/status': {
+      id: '/api/public/einvoice/status'
+      path: '/api/public/einvoice/status'
+      fullPath: '/api/public/einvoice/status'
+      preLoaderRoute: typeof ApiPublicEinvoiceStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/einvoice/inbound': {
+      id: '/api/public/einvoice/inbound'
+      path: '/api/public/einvoice/inbound'
+      fullPath: '/api/public/einvoice/inbound'
+      preLoaderRoute: typeof ApiPublicEinvoiceInboundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
+interface ClientAccountingRouteChildren {
+  ClientAccountingAccountsRoute: typeof ClientAccountingAccountsRoute
+  ClientAccountingAnalyticsRoute: typeof ClientAccountingAnalyticsRoute
+  ClientAccountingAttendanceRoute: typeof ClientAccountingAttendanceRoute
+  ClientAccountingCardsRoute: typeof ClientAccountingCardsRoute
+  ClientAccountingCashBoxesRoute: typeof ClientAccountingCashBoxesRoute
+  ClientAccountingCommissionsRoute: typeof ClientAccountingCommissionsRoute
+  ClientAccountingContactsRoute: typeof ClientAccountingContactsRoute
+  ClientAccountingCrmRoute: typeof ClientAccountingCrmRoute
+  ClientAccountingDebtOverridesRoute: typeof ClientAccountingDebtOverridesRoute
+  ClientAccountingDraftsRoute: typeof ClientAccountingDraftsRoute
+  ClientAccountingEInvoicesRoute: typeof ClientAccountingEInvoicesRoute
+  ClientAccountingEInvoicesInboxRoute: typeof ClientAccountingEInvoicesInboxRoute
+  ClientAccountingEInvoicesSettingsRoute: typeof ClientAccountingEInvoicesSettingsRoute
+  ClientAccountingEmployeesRoute: typeof ClientAccountingEmployeesRoute
+  ClientAccountingExpensesRoute: typeof ClientAccountingExpensesRoute
+  ClientAccountingHolidaysRoute: typeof ClientAccountingHolidaysRoute
+  ClientAccountingHrmRoute: typeof ClientAccountingHrmRoute
+  ClientAccountingInventoryRoute: typeof ClientAccountingInventoryRoute
+  ClientAccountingJournalsRoute: typeof ClientAccountingJournalsRoute
+  ClientAccountingLeavesRoute: typeof ClientAccountingLeavesRoute
+  ClientAccountingLedgerRoute: typeof ClientAccountingLedgerRoute
+  ClientAccountingLocationsRoute: typeof ClientAccountingLocationsRoute
+  ClientAccountingLoyaltyRoute: typeof ClientAccountingLoyaltyRoute
+  ClientAccountingMemosRoute: typeof ClientAccountingMemosRoute
+  ClientAccountingMessagesRoute: typeof ClientAccountingMessagesRoute
+  ClientAccountingPayrollRoute: typeof ClientAccountingPayrollRoute
+  ClientAccountingPosRoute: typeof ClientAccountingPosRoute
+  ClientAccountingPurchasesRoute: typeof ClientAccountingPurchasesRoute
+  ClientAccountingQuotationsRoute: typeof ClientAccountingQuotationsRoute
+  ClientAccountingRemindersRoute: typeof ClientAccountingRemindersRoute
+  ClientAccountingReportsRoute: typeof ClientAccountingReportsRoute
+  ClientAccountingSalariesRoute: typeof ClientAccountingSalariesRoute
+  ClientAccountingSalesRoute: typeof ClientAccountingSalesRoute
+  ClientAccountingSettingsRoute: typeof ClientAccountingSettingsRoute
+  ClientAccountingTasksRoute: typeof ClientAccountingTasksRoute
+  ClientAccountingIndexRoute: typeof ClientAccountingIndexRoute
+}
+
+const ClientAccountingRouteChildren: ClientAccountingRouteChildren = {
+  ClientAccountingAccountsRoute: ClientAccountingAccountsRoute,
+  ClientAccountingAnalyticsRoute: ClientAccountingAnalyticsRoute,
+  ClientAccountingAttendanceRoute: ClientAccountingAttendanceRoute,
+  ClientAccountingCardsRoute: ClientAccountingCardsRoute,
+  ClientAccountingCashBoxesRoute: ClientAccountingCashBoxesRoute,
+  ClientAccountingCommissionsRoute: ClientAccountingCommissionsRoute,
+  ClientAccountingContactsRoute: ClientAccountingContactsRoute,
+  ClientAccountingCrmRoute: ClientAccountingCrmRoute,
+  ClientAccountingDebtOverridesRoute: ClientAccountingDebtOverridesRoute,
+  ClientAccountingDraftsRoute: ClientAccountingDraftsRoute,
+  ClientAccountingEInvoicesRoute: ClientAccountingEInvoicesRoute,
+  ClientAccountingEInvoicesInboxRoute: ClientAccountingEInvoicesInboxRoute,
+  ClientAccountingEInvoicesSettingsRoute:
+    ClientAccountingEInvoicesSettingsRoute,
+  ClientAccountingEmployeesRoute: ClientAccountingEmployeesRoute,
+  ClientAccountingExpensesRoute: ClientAccountingExpensesRoute,
+  ClientAccountingHolidaysRoute: ClientAccountingHolidaysRoute,
+  ClientAccountingHrmRoute: ClientAccountingHrmRoute,
+  ClientAccountingInventoryRoute: ClientAccountingInventoryRoute,
+  ClientAccountingJournalsRoute: ClientAccountingJournalsRoute,
+  ClientAccountingLeavesRoute: ClientAccountingLeavesRoute,
+  ClientAccountingLedgerRoute: ClientAccountingLedgerRoute,
+  ClientAccountingLocationsRoute: ClientAccountingLocationsRoute,
+  ClientAccountingLoyaltyRoute: ClientAccountingLoyaltyRoute,
+  ClientAccountingMemosRoute: ClientAccountingMemosRoute,
+  ClientAccountingMessagesRoute: ClientAccountingMessagesRoute,
+  ClientAccountingPayrollRoute: ClientAccountingPayrollRoute,
+  ClientAccountingPosRoute: ClientAccountingPosRoute,
+  ClientAccountingPurchasesRoute: ClientAccountingPurchasesRoute,
+  ClientAccountingQuotationsRoute: ClientAccountingQuotationsRoute,
+  ClientAccountingRemindersRoute: ClientAccountingRemindersRoute,
+  ClientAccountingReportsRoute: ClientAccountingReportsRoute,
+  ClientAccountingSalariesRoute: ClientAccountingSalariesRoute,
+  ClientAccountingSalesRoute: ClientAccountingSalesRoute,
+  ClientAccountingSettingsRoute: ClientAccountingSettingsRoute,
+  ClientAccountingTasksRoute: ClientAccountingTasksRoute,
+  ClientAccountingIndexRoute: ClientAccountingIndexRoute,
+}
+
+const ClientAccountingRouteWithChildren =
+  ClientAccountingRoute._addFileChildren(ClientAccountingRouteChildren)
+
+interface ClientAiRouteChildren {
+  ClientAiChatRoute: typeof ClientAiChatRoute
+  ClientAiIndexRoute: typeof ClientAiIndexRoute
+}
+
+const ClientAiRouteChildren: ClientAiRouteChildren = {
+  ClientAiChatRoute: ClientAiChatRoute,
+  ClientAiIndexRoute: ClientAiIndexRoute,
+}
+
+const ClientAiRouteWithChildren = ClientAiRoute._addFileChildren(
+  ClientAiRouteChildren,
+)
+
+interface ClientBillingRouteChildren {
+  ClientBillingCallbackRoute: typeof ClientBillingCallbackRoute
+}
+
+const ClientBillingRouteChildren: ClientBillingRouteChildren = {
+  ClientBillingCallbackRoute: ClientBillingCallbackRoute,
+}
+
+const ClientBillingRouteWithChildren = ClientBillingRoute._addFileChildren(
+  ClientBillingRouteChildren,
+)
+
+interface ClientRouteChildren {
+  ClientAccountingRoute: typeof ClientAccountingRouteWithChildren
+  ClientAiRoute: typeof ClientAiRouteWithChildren
+  ClientBankingRoute: typeof ClientBankingRoute
+  ClientBillingRoute: typeof ClientBillingRouteWithChildren
+  ClientDocumentsRoute: typeof ClientDocumentsRoute
+  ClientFirmBillingRoute: typeof ClientFirmBillingRoute
+  ClientInsightsRoute: typeof ClientInsightsRoute
+  ClientScanRoute: typeof ClientScanRoute
+  ClientSettingsRoute: typeof ClientSettingsRoute
+  ClientTicketsRoute: typeof ClientTicketsRoute
+  ClientIndexRoute: typeof ClientIndexRoute
+}
+
+const ClientRouteChildren: ClientRouteChildren = {
+  ClientAccountingRoute: ClientAccountingRouteWithChildren,
+  ClientAiRoute: ClientAiRouteWithChildren,
+  ClientBankingRoute: ClientBankingRoute,
+  ClientBillingRoute: ClientBillingRouteWithChildren,
+  ClientDocumentsRoute: ClientDocumentsRoute,
+  ClientFirmBillingRoute: ClientFirmBillingRoute,
+  ClientInsightsRoute: ClientInsightsRoute,
+  ClientScanRoute: ClientScanRoute,
+  ClientSettingsRoute: ClientSettingsRoute,
+  ClientTicketsRoute: ClientTicketsRoute,
+  ClientIndexRoute: ClientIndexRoute,
+}
+
+const ClientRouteWithChildren =
+  ClientRoute._addFileChildren(ClientRouteChildren)
+
+interface FirmRouteChildren {
+  FirmAuditRoute: typeof FirmAuditRoute
+  FirmClientsRoute: typeof FirmClientsRoute
+  FirmClientsNewRoute: typeof FirmClientsNewRoute
+  FirmDocumentsRoute: typeof FirmDocumentsRoute
+  FirmEngagementsRoute: typeof FirmEngagementsRoute
+  FirmInvoicesRoute: typeof FirmInvoicesRoute
+  FirmReportsRoute: typeof FirmReportsRoute
+  FirmRolesRoute: typeof FirmRolesRoute
+  FirmSettingsRoute: typeof FirmSettingsRoute
+  FirmStaffRoute: typeof FirmStaffRoute
+  FirmTasksRoute: typeof FirmTasksRoute
+  FirmTimeRoute: typeof FirmTimeRoute
+  FirmIndexRoute: typeof FirmIndexRoute
+}
+
+const FirmRouteChildren: FirmRouteChildren = {
+  FirmAuditRoute: FirmAuditRoute,
+  FirmClientsRoute: FirmClientsRoute,
+  FirmClientsNewRoute: FirmClientsNewRoute,
+  FirmDocumentsRoute: FirmDocumentsRoute,
+  FirmEngagementsRoute: FirmEngagementsRoute,
+  FirmInvoicesRoute: FirmInvoicesRoute,
+  FirmReportsRoute: FirmReportsRoute,
+  FirmRolesRoute: FirmRolesRoute,
+  FirmSettingsRoute: FirmSettingsRoute,
+  FirmStaffRoute: FirmStaffRoute,
+  FirmTasksRoute: FirmTasksRoute,
+  FirmTimeRoute: FirmTimeRoute,
+  FirmIndexRoute: FirmIndexRoute,
+}
+
+const FirmRouteWithChildren = FirmRoute._addFileChildren(FirmRouteChildren)
+
+interface SuperAiRouteChildren {
+  SuperAiConversationsRoute: typeof SuperAiConversationsRoute
+  SuperAiDashboardRoute: typeof SuperAiDashboardRoute
+  SuperAiLeadsRoute: typeof SuperAiLeadsRoute
+  SuperAiSettingsRoute: typeof SuperAiSettingsRoute
+  SuperAiWidgetRoute: typeof SuperAiWidgetRoute
+  SuperAiIndexRoute: typeof SuperAiIndexRoute
+}
+
+const SuperAiRouteChildren: SuperAiRouteChildren = {
+  SuperAiConversationsRoute: SuperAiConversationsRoute,
+  SuperAiDashboardRoute: SuperAiDashboardRoute,
+  SuperAiLeadsRoute: SuperAiLeadsRoute,
+  SuperAiSettingsRoute: SuperAiSettingsRoute,
+  SuperAiWidgetRoute: SuperAiWidgetRoute,
+  SuperAiIndexRoute: SuperAiIndexRoute,
+}
+
+const SuperAiRouteWithChildren =
+  SuperAiRoute._addFileChildren(SuperAiRouteChildren)
+
+interface SuperCmsRouteChildren {
+  SuperCmsBlogRoute: typeof SuperCmsBlogRoute
+  SuperCmsMenusRoute: typeof SuperCmsMenusRoute
+  SuperCmsPagesRoute: typeof SuperCmsPagesRoute
+  SuperCmsIndexRoute: typeof SuperCmsIndexRoute
+}
+
+const SuperCmsRouteChildren: SuperCmsRouteChildren = {
+  SuperCmsBlogRoute: SuperCmsBlogRoute,
+  SuperCmsMenusRoute: SuperCmsMenusRoute,
+  SuperCmsPagesRoute: SuperCmsPagesRoute,
+  SuperCmsIndexRoute: SuperCmsIndexRoute,
+}
+
+const SuperCmsRouteWithChildren = SuperCmsRoute._addFileChildren(
+  SuperCmsRouteChildren,
+)
+
+interface SuperRouteChildren {
+  SuperAiRoute: typeof SuperAiRouteWithChildren
+  SuperAnnouncementsRoute: typeof SuperAnnouncementsRoute
+  SuperApiDocsRoute: typeof SuperApiDocsRoute
+  SuperAuditRoute: typeof SuperAuditRoute
+  SuperClientsNewRoute: typeof SuperClientsNewRoute
+  SuperCmsRoute: typeof SuperCmsRouteWithChildren
+  SuperCouponsRoute: typeof SuperCouponsRoute
+  SuperDeveloperRoute: typeof SuperDeveloperRoute
+  SuperEmailsRoute: typeof SuperEmailsRoute
+  SuperGatewaysRoute: typeof SuperGatewaysRoute
+  SuperHealthRoute: typeof SuperHealthRoute
+  SuperInvoicesRoute: typeof SuperInvoicesRoute
+  SuperModulesRoute: typeof SuperModulesRoute
+  SuperPageBuilderRoute: typeof SuperPageBuilderRoute
+  SuperPlanBuilderRoute: typeof SuperPlanBuilderRoute
+  SuperPlansRoute: typeof SuperPlansRoute
+  SuperReportsRoute: typeof SuperReportsRoute
+  SuperRequestsRoute: typeof SuperRequestsRoute
+  SuperRolesRoute: typeof SuperRolesRoute
+  SuperSecurityRoute: typeof SuperSecurityRoute
+  SuperSettingsRoute: typeof SuperSettingsRoute
+  SuperSubscriptionsRoute: typeof SuperSubscriptionsRoute
+  SuperTeamRoute: typeof SuperTeamRoute
+  SuperUsersRoute: typeof SuperUsersRoute
+  SuperWebhooksRoute: typeof SuperWebhooksRoute
+  SuperWorkspacesRoute: typeof SuperWorkspacesRoute
+  SuperIndexRoute: typeof SuperIndexRoute
+}
+
+const SuperRouteChildren: SuperRouteChildren = {
+  SuperAiRoute: SuperAiRouteWithChildren,
+  SuperAnnouncementsRoute: SuperAnnouncementsRoute,
+  SuperApiDocsRoute: SuperApiDocsRoute,
+  SuperAuditRoute: SuperAuditRoute,
+  SuperClientsNewRoute: SuperClientsNewRoute,
+  SuperCmsRoute: SuperCmsRouteWithChildren,
+  SuperCouponsRoute: SuperCouponsRoute,
+  SuperDeveloperRoute: SuperDeveloperRoute,
+  SuperEmailsRoute: SuperEmailsRoute,
+  SuperGatewaysRoute: SuperGatewaysRoute,
+  SuperHealthRoute: SuperHealthRoute,
+  SuperInvoicesRoute: SuperInvoicesRoute,
+  SuperModulesRoute: SuperModulesRoute,
+  SuperPageBuilderRoute: SuperPageBuilderRoute,
+  SuperPlanBuilderRoute: SuperPlanBuilderRoute,
+  SuperPlansRoute: SuperPlansRoute,
+  SuperReportsRoute: SuperReportsRoute,
+  SuperRequestsRoute: SuperRequestsRoute,
+  SuperRolesRoute: SuperRolesRoute,
+  SuperSecurityRoute: SuperSecurityRoute,
+  SuperSettingsRoute: SuperSettingsRoute,
+  SuperSubscriptionsRoute: SuperSubscriptionsRoute,
+  SuperTeamRoute: SuperTeamRoute,
+  SuperUsersRoute: SuperUsersRoute,
+  SuperWebhooksRoute: SuperWebhooksRoute,
+  SuperWorkspacesRoute: SuperWorkspacesRoute,
+  SuperIndexRoute: SuperIndexRoute,
+}
+
+const SuperRouteWithChildren = SuperRoute._addFileChildren(SuperRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
+  BlogRoute: BlogRouteWithChildren,
+  ClientRoute: ClientRouteWithChildren,
+  ContactRoute: ContactRoute,
+  CookiesRoute: CookiesRoute,
+  DpaRoute: DpaRoute,
+  FeaturesRoute: FeaturesRoute,
+  FirmRoute: FirmRouteWithChildren,
+  HelpRoute: HelpRoute,
+  IntegrationsRoute: IntegrationsRoute,
+  LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
+  PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
+  SecurityRoute: SecurityRoute,
+  ServicesRoute: ServicesRoute,
+  SetupRoute: SetupRoute,
+  SignupRoute: SignupRoute,
+  SuperRoute: SuperRouteWithChildren,
+  TermsRoute: TermsRoute,
+  ApiChatRoute: ApiChatRoute,
+  CCardNumberRoute: CCardNumberRoute,
+  StaffLoginRoute: StaffLoginRoute,
+  ApiPublicEinvoiceInboundRoute: ApiPublicEinvoiceInboundRoute,
+  ApiPublicEinvoiceStatusRoute: ApiPublicEinvoiceStatusRoute,
+  ApiPublicWidgetChatRoute: ApiPublicWidgetChatRoute,
+  ApiPublicWidgetEmbedDotjsRoute: ApiPublicWidgetEmbedDotjsRoute,
+  ApiPublicYtjBusinessIdRoute: ApiPublicYtjBusinessIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

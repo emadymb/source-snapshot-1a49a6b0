@@ -1,0 +1,18 @@
+{
+  "name": "Fiksu Workspace",
+  "short_name": "Fiksu",
+  "description": "AI-powered accounting for Finnish SMEs — receipts, invoices, payroll, and insights in one app.",
+  "start_url": "/client",
+  "scope": "/client",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#4338ca",
+  "lang": "en",
+  "dir": "auto",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" },
+    { "src": "/favicon.ico", "sizes": "any",   "type": "image/x-icon" }
+  ]
+}
