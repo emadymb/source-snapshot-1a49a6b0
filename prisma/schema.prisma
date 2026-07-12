@@ -1041,3 +1041,28 @@ model FirmBillingInvoice {
   @@index([workspaceId])
   @@map("firm_billing_invoices")
 }
+
+// ============================================================================
+// Receipt extractions (OCR + AI parse → Finnish accounting CSV for accountant)
+// ============================================================================
+model ReceiptExtraction {
+  id            String   @id @default(uuid()) @db.Uuid
+  workspaceId   String   @map("workspace_id") @db.Uuid
+  companyId     String?  @map("company_id") @db.Uuid
+  uploadedBy    String?  @map("uploaded_by") @db.Uuid
+  status        String   @default("sent_to_accountant") // draft | sent_to_accountant | posted
+  model         String   @default("google/gemini-2.5-flash")
+  imageMime     String   @default("image/jpeg") @map("image_mime")
+  rawText       String?  @map("raw_text")
+  parsedRows    Json     @map("parsed_rows")
+  csvContent    String   @map("csv_content")
+  supplier      String?
+  totalAmount   Decimal? @map("total_amount") @db.Decimal(14, 2)
+  currency      String   @default("EUR")
+  messageId     String?  @map("message_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@index([companyId])
+  @@map("receipt_extractions")
+}
