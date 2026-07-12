@@ -604,6 +604,278 @@ export const listInboundEInvoices = createServerFn({ method: "GET" }).handler(
   },
 );
 
+// ---------------------------------------------------------------------------
+// Expenses (out-of-pocket & vendor spend)
+// ---------------------------------------------------------------------------
+export type UiExpenseStatus = "pending" | "approved" | "reimbursed" | "rejected";
+
+export interface ExpenseDTO {
+  id: string;
+  date: string; // YYYY-MM-DD
+  vendor: string;
+  category: string;
+  amount: number; // EUR
+  vatRate: number;
+  currency: string;
+  notes: string | null;
+  status: UiExpenseStatus;
+  receiptExtractionId: string | null;
+}
+
+const toDbExpStatus = (s: UiExpenseStatus) =>
+  ({ pending: "PENDING", approved: "APPROVED", reimbursed: "REIMBURSED", rejected: "REJECTED" } as const)[s];
+const fromDbExpStatus = (s: string): UiExpenseStatus =>
+  (({ PENDING: "pending", APPROVED: "approved", REIMBURSED: "reimbursed", REJECTED: "rejected" } as const)[
+    s as "PENDING"
+  ] ?? "pending");
+
+const FALLBACK_EXPENSES: ExpenseDTO[] = [
+  { id: "e1", date: "2026-03-08", vendor: "K-Supermarket", category: "Groceries", amount: 48.2, vatRate: 14, currency: "EUR", notes: null, status: "approved", receiptExtractionId: null },
+  { id: "e2", date: "2026-03-05", vendor: "Verkkokauppa.com", category: "Software", amount: 249, vatRate: 24, currency: "EUR", notes: null, status: "pending", receiptExtractionId: null },
+];
+
+export const listExpenses = createServerFn({ method: "GET" }).handler(async (): Promise<ExpenseDTO[]> => {
+  if (!dbConfigured()) return FALLBACK_EXPENSES;
+  try {
+    const { companyId, session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    return await withTenant(session.userId, async (tx) => {
+      const rows = await tx.expense.findMany({ where: { companyId }, orderBy: { date: "desc" }, take: 500 });
+      return rows.map((e) => ({
+        id: e.id, date: day(e.date), vendor: e.vendor, category: e.category,
+        amount: e.amountCents / 100, vatRate: e.vatRate, currency: e.currency,
+        notes: e.notes, status: fromDbExpStatus(e.status), receiptExtractionId: e.receiptExtractionId,
+      }));
+    });
+  } catch { return FALLBACK_EXPENSES; }
+});
+
+const expenseInput = z.object({
+  id: z.string().optional(),
+  date: z.string().min(1),
+  vendor: z.string().trim().min(1).max(200),
+  category: z.string().trim().min(1).max(80).default("Other"),
+  amount: z.number().positive().max(10_000_000),
+  vatRate: z.number().min(0).max(100).default(24),
+  currency: z.string().length(3).default("EUR"),
+  notes: z.string().max(1000).nullable().optional(),
+  status: z.enum(["pending", "approved", "reimbursed", "rejected"]).default("pending"),
+  receiptExtractionId: z.string().uuid().nullable().optional(),
+});
+
+export const upsertExpense = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => expenseInput.parse(d))
+  .handler(async ({ data }): Promise<{ id: string }> => {
+    const { companyId, session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    const id = await withTenant(session.userId, async (tx) => {
+      const base = {
+        date: new Date(data.date),
+        vendor: data.vendor,
+        category: data.category,
+        amountCents: Math.round(data.amount * 100),
+        vatRate: data.vatRate,
+        currency: data.currency,
+        notes: data.notes ?? null,
+        status: toDbExpStatus(data.status),
+        receiptExtractionId: data.receiptExtractionId ?? null,
+      };
+      if (data.id) {
+        await tx.expense.update({ where: { id: data.id }, data: base });
+        return data.id;
+      }
+      const created = await tx.expense.create({ data: { ...base, companyId, createdBy: session.userId } });
+      return created.id;
+    });
+    await audit(session.userId, data.id ? "update" : "create", "expense", id);
+    return { id };
+  });
+
+export const setExpenseStatus = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; status: UiExpenseStatus }) => d)
+  .handler(async ({ data }) => {
+    const { session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    await withTenant(session.userId, (tx) =>
+      tx.expense.update({ where: { id: data.id }, data: { status: toDbExpStatus(data.status) } }),
+    );
+    await audit(session.userId, `status:${data.status}`, "expense", data.id);
+    return { ok: true as const };
+  });
+
+export const deleteExpense = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => d)
+  .handler(async ({ data }) => {
+    const { session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    await withTenant(session.userId, (tx) => tx.expense.delete({ where: { id: data.id } }));
+    await audit(session.userId, "delete", "expense", data.id);
+    return { ok: true as const };
+  });
+
+// ---------------------------------------------------------------------------
+// Receipt extractions (OCR history)
+// ---------------------------------------------------------------------------
+export interface ReceiptExtractionDTO {
+  id: string;
+  status: string;
+  supplier: string | null;
+  totalAmount: number | null;
+  currency: string;
+  model: string;
+  csvContent: string;
+  parsedRows: unknown;
+  rowCount: number;
+  createdAt: string;
+  expenseId: string | null;
+}
+
+export const listReceiptExtractions = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ReceiptExtractionDTO[]> => {
+    if (!dbConfigured()) return [];
+    try {
+      const { companyId, session } = await companyCtx();
+      const { withTenant } = await import("./db.server");
+      return await withTenant(session.userId, async (tx) => {
+        const rows = await tx.receiptExtraction.findMany({
+          where: { OR: [{ companyId }, { companyId: null }] },
+          orderBy: { createdAt: "desc" },
+          take: 200,
+        });
+        const ids = rows.map((r) => r.id);
+        const linked = ids.length
+          ? await tx.expense.findMany({ where: { receiptExtractionId: { in: ids } }, select: { id: true, receiptExtractionId: true } })
+          : [];
+        const expByExt = new Map(linked.map((e) => [e.receiptExtractionId!, e.id]));
+        return rows.map((r) => {
+          const parsed = r.parsedRows as unknown;
+          const count = Array.isArray(parsed) ? parsed.length : 0;
+          return {
+            id: r.id,
+            status: r.status,
+            supplier: r.supplier,
+            totalAmount: r.totalAmount ? Number(r.totalAmount) : null,
+            currency: r.currency,
+            model: r.model,
+            csvContent: r.csvContent,
+            parsedRows: parsed,
+            rowCount: count,
+            createdAt: r.createdAt.toISOString(),
+            expenseId: expByExt.get(r.id) ?? null,
+          };
+        });
+      });
+    } catch { return []; }
+  },
+);
+
+// Post a receipt extraction as an Expense row (accountant one-click action).
+export const postReceiptAsExpense = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; accountCode?: string }) => d)
+  .handler(async ({ data }): Promise<{ id: string }> => {
+    const { companyId, session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    const id = await withTenant(session.userId, async (tx) => {
+      const rec = await tx.receiptExtraction.findFirst({ where: { id: data.id } });
+      if (!rec) throw new Error("Receipt not found.");
+      const existing = await tx.expense.findFirst({ where: { receiptExtractionId: rec.id } });
+      if (existing) return existing.id;
+      const rows = Array.isArray(rec.parsedRows) ? (rec.parsedRows as Array<{ pvm?: string; asiakasToimittaja?: string | null; selite?: string; alv?: number | null; debet?: number | null }>) : [];
+      const firstDate = rows.find((r) => r.pvm)?.pvm ?? new Date().toISOString().slice(0, 10);
+      const supplier = rec.supplier ?? rows.find((r) => r.asiakasToimittaja)?.asiakasToimittaja ?? "Unknown";
+      const total = rec.totalAmount ? Number(rec.totalAmount) : rows.reduce((s, r) => s + (r.debet ?? 0), 0);
+      const vat = rows.find((r) => typeof r.alv === "number")?.alv ?? 24;
+      const notes = rows.map((r) => r.selite).filter(Boolean).join(" · ");
+      const created = await tx.expense.create({
+        data: {
+          companyId, createdBy: session.userId,
+          date: new Date(firstDate), vendor: supplier, category: "Receipt",
+          amountCents: Math.round(total * 100), vatRate: vat as number, currency: rec.currency,
+          notes: notes || null, status: "PENDING", receiptExtractionId: rec.id,
+        },
+      });
+      await tx.receiptExtraction.update({ where: { id: rec.id }, data: { status: "posted" } });
+      return created.id;
+    });
+    await audit(session.userId, "post_receipt", "expense", id);
+    return { id };
+  });
+
+// ---------------------------------------------------------------------------
+// AI-callable actions — return plain JSON, log an audit row.
+// Wrapped as authenticated server functions so tool `execute` handlers can
+// persist directly through the same tenant guard as the UI.
+// ---------------------------------------------------------------------------
+export const aiCreateExpense = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    date?: string; vendor: string; category?: string;
+    amount: number; vatRate?: number; currency?: string; notes?: string | null;
+  }) => d)
+  .handler(async ({ data }): Promise<{ id: string; message: string }> => {
+    const { companyId, session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    const created = await withTenant(session.userId, (tx) =>
+      tx.expense.create({
+        data: {
+          companyId, createdBy: session.userId,
+          date: data.date ? new Date(data.date) : new Date(),
+          vendor: data.vendor.trim() || "Unknown",
+          category: data.category ?? "Other",
+          amountCents: Math.round(Math.abs(data.amount) * 100),
+          vatRate: data.vatRate ?? 24,
+          currency: data.currency ?? "EUR",
+          notes: data.notes ?? null,
+          status: "PENDING",
+        },
+      }),
+    );
+    await audit(session.userId, "ai:create", "expense", created.id);
+    return { id: created.id, message: `Expense saved as draft #${created.id.slice(0, 8)} — pending accountant review.` };
+  });
+
+export const aiCreateJournalEntry = createServerFn({ method: "POST" })
+  .inputValidator((d: { date?: string; memo?: string; debitAccountCode: string; creditAccountCode: string; amount: number }) => d)
+  .handler(async ({ data }): Promise<{ id: string; message: string }> => {
+    const { companyId, session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    const result = await withTenant(session.userId, async (tx) => {
+      const [deb, cred] = await Promise.all([
+        tx.chartOfAccount.findFirst({ where: { companyId, code: data.debitAccountCode } }),
+        tx.chartOfAccount.findFirst({ where: { companyId, code: data.creditAccountCode } }),
+      ]);
+      if (!deb || !cred) throw new Error(`Account not found (debit=${data.debitAccountCode}, credit=${data.creditAccountCode}).`);
+      const j = await tx.journalEntry.create({
+        data: {
+          companyId, date: data.date ? new Date(data.date) : new Date(),
+          memo: data.memo ?? null,
+          debitAccountId: deb.id, creditAccountId: cred.id,
+          amountCents: Math.round(Math.abs(data.amount) * 100),
+        },
+      });
+      return j.id;
+    });
+    await audit(session.userId, "ai:create", "journal_entry", result);
+    return { id: result, message: `Journal entry posted (debit ${data.debitAccountCode} / credit ${data.creditAccountCode}).` };
+  });
+
+export const aiCreateCustomer = createServerFn({ method: "POST" })
+  .inputValidator((d: { name: string; vatId?: string | null; email?: string | null; country?: string }) => d)
+  .handler(async ({ data }): Promise<{ id: string; message: string }> => {
+    const { companyId, session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    const created = await withTenant(session.userId, (tx) =>
+      tx.customer.create({
+        data: {
+          companyId, name: data.name.trim(),
+          vatId: data.vatId ?? null, email: data.email ?? null,
+          country: data.country ?? "FI",
+        },
+      }),
+    );
+    await audit(session.userId, "ai:create", "customer", created.id);
+    return { id: created.id, message: `Customer "${data.name}" created.` };
+  });
+
 export const updateInboundEInvoiceStatus = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string; status: "RECEIVED" | "APPROVED" | "REJECTED" | "PAID" }) => d)
   .handler(async ({ data }): Promise<{ ok: true }> => {
