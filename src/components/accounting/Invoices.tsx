@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
-import { Plus, Trash2, Send, CheckCircle2, FileText, Pencil, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, Send, CheckCircle2, FileText, Pencil, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { PageHeading } from "@/components/PagePlaceholder";
 import { Button } from "@/components/ui/button";
@@ -11,39 +12,55 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataToolbar, StatusPill } from "./DataToolbar";
-import { store, useStore, invoiceTotal, fmt, type Invoice, type InvoiceLine } from "@/lib/mock/store";
+import { fmt } from "@/lib/format";
+import {
+  listInvoices, listCustomers, upsertInvoice, setInvoiceStatus, deleteInvoice,
+  type InvoiceDTO, type InvoiceLineDTO, type CustomerDTO, type UiInvoiceStatus,
+} from "@/lib/accounting.functions";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-function statusTone(s: Invoice["status"]) {
+function statusTone(s: UiInvoiceStatus) {
   return s === "paid" ? "success" : s === "overdue" ? "danger" : s === "draft" ? "muted" : "info";
 }
 
+type DraftLine = InvoiceLineDTO & { key: string };
+type Draft = {
+  id?: string; number?: string; customerId: string; issueDate: string; dueDate: string;
+  status: UiInvoiceStatus; notes: string; lines: DraftLine[];
+};
+
 export function InvoicesScreen() {
-  const invoices = useStore((s) => s.invoices);
-  const contacts = useStore((s) => s.contacts);
-  const products = useStore((s) => s.products);
+  const qc = useQueryClient();
+  const { data: invoices = [], isLoading } = useQuery({ queryKey: ["accounting", "invoices"], queryFn: () => listInvoices(), staleTime: 30_000 });
+  const { data: contacts = [] } = useQuery({ queryKey: ["accounting", "customers"], queryFn: () => listCustomers(), staleTime: 30_000 });
+  const invalidate = () => { qc.invalidateQueries({ queryKey: ["accounting", "invoices"] }); qc.invalidateQueries({ queryKey: ["accounting", "reports"] }); };
+  const setStatus = useMutation({
+    mutationFn: (v: { id: string; status: UiInvoiceStatus }) => setInvoiceStatus({ data: v }),
+    onSuccess: () => invalidate(),
+  });
+  const del = useMutation({ mutationFn: (id: string) => deleteInvoice({ data: { id } }), onSuccess: () => { invalidate(); toast("Deleted"); } });
+
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [editing, setEditing] = useState<Invoice | null>(null);
+  const [editing, setEditing] = useState<Draft | null>(null);
   const [open, setOpen] = useState(false);
 
   const filtered = useMemo(() => {
-    return invoices.filter((i) => {
+    return invoices.filter((i: InvoiceDTO) => {
       if (statusFilter !== "all" && i.status !== statusFilter) return false;
       if (!q) return true;
-      const c = contacts.find((c) => c.id === i.contactId);
       return (
         i.number.toLowerCase().includes(q.toLowerCase()) ||
-        (c?.name.toLowerCase().includes(q.toLowerCase()) ?? false)
+        i.customerName.toLowerCase().includes(q.toLowerCase())
       );
     });
-  }, [invoices, contacts, q, statusFilter]);
+  }, [invoices, q, statusFilter]);
 
   const totals = useMemo(() => {
     let outstanding = 0, paid = 0, overdue = 0;
     for (const i of invoices) {
-      const { total } = invoiceTotal(i);
+      const total = i.total;
       if (i.status === "paid") paid += total;
       else if (i.status === "overdue") overdue += total;
       else if (i.status !== "draft") outstanding += total;
@@ -55,37 +72,40 @@ export function InvoicesScreen() {
     const map = new Map<string, number>();
     for (const i of invoices) {
       const k = i.issueDate.slice(0, 7);
-      map.set(k, (map.get(k) ?? 0) + invoiceTotal(i).total);
+      map.set(k, (map.get(k) ?? 0) + i.total);
     }
     return Array.from(map.entries()).sort().map(([m, v]) => ({ m, v: Math.round(v) }));
   }, [invoices]);
 
-  const newInvoice = (): Invoice => ({
-    id: "",
-    number: "",
-    contactId: contacts[0]?.id ?? "",
+  const newInvoice = (): Draft => ({
+    customerId: contacts[0]?.id ?? "",
     issueDate: new Date().toISOString().slice(0, 10),
     dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
     status: "draft",
-    lines: [{ id: uid(), description: products[0]?.name ?? "", qty: 1, unitPrice: products[0]?.price ?? 0, vatRate: products[0]?.vatRate ?? 24, productId: products[0]?.id }],
+    notes: "",
+    lines: [{ key: uid(), description: "", qty: 1, unitPrice: 0, vatRate: 24 }],
+  });
+
+  const editDraft = (i: InvoiceDTO): Draft => ({
+    id: i.id, number: i.number, customerId: i.customerId ?? "", issueDate: i.issueDate,
+    dueDate: i.dueDate ?? new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+    status: i.status, notes: i.notes ?? "",
+    lines: i.lines.map((l) => ({ key: l.id ?? uid(), description: l.description, qty: l.qty, unitPrice: l.unitPrice, vatRate: l.vatRate })),
   });
 
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeading
         title="Invoices"
-        description="Issue, track, and reconcile customer invoices."
+        description="Live customer invoices from your accounting database."
         icon={FileText}
         actions={
-          <>
-            <Button variant="outline" className="rounded-xl border-glass-border bg-glass">Export CSV</Button>
             <Button
               className="rounded-xl bg-gradient-primary text-primary-foreground shadow-[var(--shadow-glow)]"
               onClick={() => { setEditing(newInvoice()); setOpen(true); }}
             >
               <Plus className="me-1.5 size-4" /> New invoice
             </Button>
-          </>
         }
       />
 
@@ -148,33 +168,32 @@ export function InvoicesScreen() {
               </tr>
             </thead>
             <tbody>
+              {isLoading && <tr><td colSpan={7} className="py-8 text-center text-muted-foreground"><Loader2 className="mx-auto size-4 animate-spin" /></td></tr>}
               {filtered.map((i) => {
-                const c = contacts.find((c) => c.id === i.contactId);
-                const { total } = invoiceTotal(i);
                 return (
                   <tr key={i.id} className="border-b border-glass-border/60 last:border-0 hover:bg-secondary/40">
                     <td className="py-3 pr-4 font-mono text-xs">{i.number}</td>
-                    <td className="py-3 pr-4">{c?.name ?? "—"}</td>
+                    <td className="py-3 pr-4">{i.customerName}</td>
                     <td className="py-3 pr-4 text-muted-foreground">{i.issueDate}</td>
-                    <td className="py-3 pr-4 text-muted-foreground">{i.dueDate}</td>
-                    <td className="py-3 pr-4 text-right font-medium">{fmt.format(total)}</td>
+                    <td className="py-3 pr-4 text-muted-foreground">{i.dueDate ?? "—"}</td>
+                    <td className="py-3 pr-4 text-right font-medium">{fmt.format(i.total)}</td>
                     <td className="py-3 pr-4"><StatusPill tone={statusTone(i.status)}>{i.status}</StatusPill></td>
                     <td className="py-3">
                       <div className="flex items-center justify-end gap-1">
                         {i.status !== "paid" && (
-                          <Button size="icon" variant="ghost" className="size-8" title="Mark paid" onClick={() => { store.setInvoiceStatus(i.id, "paid"); toast.success(`${i.number} marked paid`); }}>
+                          <Button size="icon" variant="ghost" className="size-8" title="Mark paid" onClick={() => { setStatus.mutate({ id: i.id, status: "paid" }); toast.success(`${i.number} marked paid`); }}>
                             <CheckCircle2 className="size-4" />
                           </Button>
                         )}
                         {i.status === "draft" && (
-                          <Button size="icon" variant="ghost" className="size-8" title="Send" onClick={() => { store.setInvoiceStatus(i.id, "sent"); toast.success(`${i.number} sent`); }}>
+                          <Button size="icon" variant="ghost" className="size-8" title="Send" onClick={() => { setStatus.mutate({ id: i.id, status: "sent" }); toast.success(`${i.number} sent`); }}>
                             <Send className="size-4" />
                           </Button>
                         )}
-                        <Button size="icon" variant="ghost" className="size-8" title="Edit" onClick={() => { setEditing(i); setOpen(true); }}>
+                        <Button size="icon" variant="ghost" className="size-8" title="Edit" onClick={() => { setEditing(editDraft(i)); setOpen(true); }}>
                           <Pencil className="size-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="size-8 text-destructive" title="Delete" onClick={() => { store.deleteInvoice(i.id); toast(`${i.number} deleted`); }}>
+                        <Button size="icon" variant="ghost" className="size-8 text-destructive" title="Delete" onClick={() => del.mutate(i.id)}>
                           <Trash2 className="size-4" />
                         </Button>
                       </div>
@@ -190,50 +209,58 @@ export function InvoicesScreen() {
         </div>
       </div>
 
-      <InvoiceEditor open={open} onOpenChange={setOpen} invoice={editing} />
+      <InvoiceEditor open={open} onOpenChange={setOpen} draft={editing} contacts={contacts} onSaved={invalidate} />
     </div>
   );
 }
 
-function InvoiceEditor({ open, onOpenChange, invoice }: { open: boolean; onOpenChange: (o: boolean) => void; invoice: Invoice | null }) {
-  const contacts = useStore((s) => s.contacts);
-  const products = useStore((s) => s.products);
-  const [draft, setDraft] = useState<Invoice | null>(invoice);
+function InvoiceEditor({ open, onOpenChange, draft: initialDraft, contacts, onSaved }: { open: boolean; onOpenChange: (o: boolean) => void; draft: Draft | null; contacts: CustomerDTO[]; onSaved: () => void }) {
+  const [draft, setDraft] = useState<Draft | null>(initialDraft);
+  useEffect(() => setDraft(initialDraft), [initialDraft]);
 
-  // Sync when invoice changes
-  useMemoSync(() => setDraft(invoice), [invoice]);
+  const save = useMutation({
+    mutationFn: (d: Draft) => upsertInvoice({
+      data: {
+        id: d.id, customerId: d.customerId || null, issueDate: d.issueDate, dueDate: d.dueDate || null,
+        notes: d.notes || null, currency: "EUR",
+        lines: d.lines.map((l) => ({ description: l.description, qty: l.qty, unitPrice: l.unitPrice, vatRate: l.vatRate })),
+      },
+    }),
+    onSuccess: () => { onSaved(); toast.success("Invoice saved"); onOpenChange(false); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   if (!draft) return null;
-  const { subtotal, vat, total } = invoiceTotal(draft);
+  const subtotal = draft.lines.reduce((a, l) => a + l.qty * l.unitPrice, 0);
+  const vat = draft.lines.reduce((a, l) => a + l.qty * l.unitPrice * (l.vatRate / 100), 0);
+  const total = subtotal + vat;
 
-  const updateLine = (id: string, patch: Partial<InvoiceLine>) =>
-    setDraft({ ...draft, lines: draft.lines.map((l) => (l.id === id ? { ...l, ...patch } : l)) });
+  const updateLine = (key: string, patch: Partial<DraftLine>) =>
+    setDraft({ ...draft, lines: draft.lines.map((l) => (l.key === key ? { ...l, ...patch } : l)) });
 
-  const addLine = () => setDraft({ ...draft, lines: [...draft.lines, { id: uid(), description: "", qty: 1, unitPrice: 0, vatRate: 24 }] });
-  const removeLine = (id: string) => setDraft({ ...draft, lines: draft.lines.filter((l) => l.id !== id) });
+  const addLine = () => setDraft({ ...draft, lines: [...draft.lines, { key: uid(), description: "", qty: 1, unitPrice: 0, vatRate: 24 }] });
+  const removeLine = (key: string) => setDraft({ ...draft, lines: draft.lines.filter((l) => l.key !== key) });
 
-  const save = () => {
-    store.upsertInvoice(draft);
-    toast.success(draft.id ? "Invoice updated" : "Invoice created");
-    onOpenChange(false);
+  const submit = () => {
+    if (!draft.lines.length) return toast.error("Add at least one line");
+    if (draft.lines.some((l) => !l.description.trim())) return toast.error("Every line needs a description");
+    save.mutate(draft);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{draft.id ? `Edit ${draft.number}` : "New invoice"}</DialogTitle>
+          <DialogTitle>{draft.id ? `Edit ${draft.number ?? ""}` : "New invoice"}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="md:col-span-1">
             <Label>Customer</Label>
-            <Select value={draft.contactId} onValueChange={(v) => setDraft({ ...draft, contactId: v })}>
+            <Select value={draft.customerId} onValueChange={(v) => setDraft({ ...draft, customerId: v })}>
               <SelectTrigger className="mt-1.5 rounded-xl"><SelectValue /></SelectTrigger>
               <SelectContent>
-                {contacts.filter((c) => c.type !== "vendor").map((c) => (
-                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                ))}
+                {contacts.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -256,18 +283,12 @@ function InvoiceEditor({ open, onOpenChange, invoice }: { open: boolean; onOpenC
             <div className="col-span-1"></div>
           </div>
           {draft.lines.map((l) => (
-            <div key={l.id} className="grid grid-cols-12 gap-2 border-b border-glass-border px-3 py-2 last:border-0">
-              <Select value={l.productId ?? ""} onValueChange={(v) => {
-                const p = products.find((p) => p.id === v);
-                if (p) updateLine(l.id, { productId: p.id, description: p.name, unitPrice: p.price, vatRate: p.vatRate });
-              }}>
-                <SelectTrigger className="col-span-5 h-9 rounded-lg text-sm"><SelectValue placeholder="Choose product…">{l.description || "Choose product…"}</SelectValue></SelectTrigger>
-                <SelectContent>{products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
-              </Select>
-              <Input type="number" value={l.qty} onChange={(e) => updateLine(l.id, { qty: +e.target.value })} className="col-span-2 h-9 rounded-lg text-right" />
-              <Input type="number" value={l.unitPrice} onChange={(e) => updateLine(l.id, { unitPrice: +e.target.value })} className="col-span-2 h-9 rounded-lg text-right" />
-              <Input type="number" value={l.vatRate} onChange={(e) => updateLine(l.id, { vatRate: +e.target.value })} className="col-span-2 h-9 rounded-lg text-right" />
-              <Button size="icon" variant="ghost" className="col-span-1 size-9 text-destructive" onClick={() => removeLine(l.id)}><X className="size-4" /></Button>
+            <div key={l.key} className="grid grid-cols-12 gap-2 border-b border-glass-border px-3 py-2 last:border-0">
+              <Input value={l.description} placeholder="Description" onChange={(e) => updateLine(l.key, { description: e.target.value })} className="col-span-5 h-9 rounded-lg" />
+              <Input type="number" value={l.qty} onChange={(e) => updateLine(l.key, { qty: +e.target.value })} className="col-span-2 h-9 rounded-lg text-right" />
+              <Input type="number" value={l.unitPrice} onChange={(e) => updateLine(l.key, { unitPrice: +e.target.value })} className="col-span-2 h-9 rounded-lg text-right" />
+              <Input type="number" value={l.vatRate} onChange={(e) => updateLine(l.key, { vatRate: +e.target.value })} className="col-span-2 h-9 rounded-lg text-right" />
+              <Button size="icon" variant="ghost" className="col-span-1 size-9 text-destructive" onClick={() => removeLine(l.key)}><X className="size-4" /></Button>
             </div>
           ))}
           <div className="p-2">
@@ -278,7 +299,7 @@ function InvoiceEditor({ open, onOpenChange, invoice }: { open: boolean; onOpenC
         <div className="mt-2 grid gap-4 md:grid-cols-2">
           <div>
             <Label>Notes</Label>
-            <Textarea value={draft.notes ?? ""} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} className="mt-1.5 rounded-xl" rows={3} />
+            <Textarea value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} className="mt-1.5 rounded-xl" rows={3} />
           </div>
           <div className="rounded-xl bg-secondary/40 p-4 text-sm">
             <div className="flex justify-between py-1"><span className="text-muted-foreground">Subtotal</span><span>{fmt.format(subtotal)}</span></div>
@@ -289,15 +310,9 @@ function InvoiceEditor({ open, onOpenChange, invoice }: { open: boolean; onOpenC
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button className="bg-gradient-primary text-primary-foreground" onClick={save}>Save invoice</Button>
+          <Button className="bg-gradient-primary text-primary-foreground" disabled={save.isPending} onClick={submit}>{save.isPending ? "Saving…" : "Save invoice"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
-
-// tiny helper: run effect only when deps change (avoids importing useEffect unused elsewhere)
-import { useEffect } from "react";
-function useMemoSync(fn: () => void, deps: unknown[]) {
-  useEffect(fn, deps); // eslint-disable-line react-hooks/exhaustive-deps
 }
