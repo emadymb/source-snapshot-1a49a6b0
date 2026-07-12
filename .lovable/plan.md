@@ -1,48 +1,54 @@
-# Convert remaining modules to real DB (Prisma) — hard-delete of mock data
+الطلب كبير جداً (39 ملفاً تستخدم mock data عبر بوابة الشركة، لوحة الـSuper Admin، وواجهات العميل المحاسبية). سأنفذ على 3 مراحل، وأبدأ فوراً بالمرحلة 1 لأنها الأثر الأكبر ومتوافقة تماماً مع طلبك عن الـOCR.
 
-Previous turns finished the SaaS/Super Admin module (Prisma-backed, `src/lib/mock/saas.tsx` deleted). The five remaining mock stores are still in use across ~40 routes/components:
+## المرحلة 1 — OCR حقيقي → CSV محاسبي فنلندي للمحاسب (تنفيذ فوري)
 
-- `src/lib/mock/cms.ts` — CMS pages, blog, menus, themes
-- `src/lib/mock/firm.tsx` — firm clients, staff, tasks, engagements, roles, time, docs
-- `src/lib/mock/hrm.tsx` — employees, attendance, leaves, tasks, memos, reminders, messages, holidays
-- `src/lib/mock/ai.ts` — AI conversations, leads, model routing, usage logs
-- `src/lib/mock/audit.tsx` — audit trail
-- `src/lib/mock/store.ts` — shared accounting store (invoices, contacts, products, journals, ledger, expenses, reports)
+**الهدف:** رفع الإيصال → استخراج نص (Tesseract محلي + AI fallback) → تحليل ذكي عبر Lovable AI (Gemini) لاستخراج الحقول الفنلندية → توليد CSV → حفظه في DB وإرساله للمحاسب.
 
-Doing all five in one turn produces a giant unreviewable diff and high risk of type-check regressions. I will convert them **module by module**, one turn each. Each conversion follows the same recipe used for SaaS.
+- إضافة جدول `receipt_extractions` في Prisma (companyId, workspaceId, uploadedBy, imageUrl, rawText, parsedRows JSON, csvContent, status, accountantNoteId).
+- ملف server function جديد `src/lib/ocr.functions.ts`:
+  - `extractReceiptToCsv({ imageBase64, workspaceId, companyId })`
+  - يستخدم Tesseract على السيرفر (نص خام) ثم `generateText` مع `Output.object` عبر Lovable AI Gateway (`google/gemini-2.5-flash`) لاستخراج مصفوفة سطور بالحقول:
+    - `Pvm` (Date, ISO), `Tili` (Account code)، `Debet`، `Kredit`، `Kohdennus`، `Alv` (%)، `Asiakas/Toimittaja`، `Selite`
+  - يبني CSV بترتيب: `Pvm;Tili;Debet;Kredit;Kohdennus;Alv;Asiakas/Toimittaja;Selite` (فاصلة منقوطة — القياسي الفنلندي)، مع BOM لدعم Excel.
+  - يخزّن السجل في `receipt_extractions` وينشئ رسالة/مهمة للمحاسب المسؤول عن الـworkspace مع مرفق CSV (يوجد جدول Messages بالفعل).
+- استبدال `src/components/ai/OcrUploader.tsx`:
+  - يستدعي `extractReceiptToCsv` مباشرة عند اختيار الملف (بدون انتظار مراجعة).
+  - يعرض جدول الأسطر المستخرجة + زر "تحميل CSV" وحالة "تم الإرسال للمحاسب ✓".
+- إزالة `aiStore.logUsage` (mock) واستبدالها بجدول `ai_usage_logs` حقيقي.
 
-## Per-module recipe (each turn)
+## المرحلة 2 — تفعيل الذكاء الاصطناعي بالكامل
 
-1. Extend `prisma/schema.prisma` with the required tables (if not already present), `GRANT`s handled by our current setup, plus tenant scoping via `workspaceId`.
-2. Generate a Prisma migration file under `prisma/migrations/`.
-3. Add / extend server functions in `src/lib/<module>.functions.ts`:
-   - `list*`, `get*` (GET) with tenant filter via `withTenant(userId, ...)`.
-   - `upsert*`, `delete*`, action mutations (POST) with role checks + `auditLog.create`.
-4. Rewrite each consuming route/component to use `useQuery` + `useServerFn` instead of the mock store.
-5. Delete the mock store file and its `Provider` from the shell/root route.
-6. Empty-state UI everywhere (no seed fallback).
-7. Typecheck.
+- التحقق من وجود `LOVABLE_API_KEY` (سأنشئه إن لم يوجد). و اكتب `LOVABLE_API_KEY في ملف ال installation so i can use it whem I run the project in my laptop`
+- `/api/chat` و `client.ai.chat.tsx` مربوطان فعلياً بـLovable AI — أحذف `mockAI` وأمرر السياق الحقيقي (المعاملات الأخيرة للشركة من DB) داخل system prompt.
+- إضافة أداة `record_expense` تنفيذية حقيقية: تكتب في جدول `expenses` بدل المسودة الوهمية.
+- تفعيل تحليلات الاستخدام (`super.ai.dashboard`, `super.ai.conversations`) من الجداول الحقيقية.
 
-## Proposed order (one module per turn)
+## المرحلة 3 — حذف mock data من الواجهات (متدرج)
 
-| # | Module | Mock file | Routes / components touched |
-|---|--------|-----------|-----------------------------|
-| 1 | Firm (clients, staff, tasks, engagements, roles, docs, time, reports) | `mock/firm.tsx` | ~14 files under `src/routes/firm.*` + `FirmShell`, `PlanEntitlementsDrawer` |
-| 2 | Accounting core (invoices, contacts, products, journals, ledger, expenses, reports, chart of accounts) | `mock/store.ts` | 8 components under `src/components/accounting/*` |
-| 3 | HRM (employees, attendance, leaves, holidays, tasks, memos, reminders, messages) | `mock/hrm.tsx` | 8 routes under `src/routes/client.accounting.*` |
-| 4 | AI (conversations, leads, usage logs, model routing, settings) | `mock/ai.ts` | `super.ai.*` routes, `client.ai.chat`, `OcrUploader` |
-| 5 | CMS (pages, blog, menus, themes, SEO) | `mock/cms.ts` | `super.cms.*` routes |
-| 6 | Audit trail (unified across all above) | `mock/audit.tsx` | `firm.audit`, `super.audit` — largely already writing via `auditLog.create` |
+نظراً لأن 39 ملفاً تعتمد على `src/lib/mock/*`، سأحذف على دفعات (كل دفعة قابلة للاختبار):
 
-## What ships this turn
+- **دفعة A** — بوابة العميل المحاسبية (12 ملف): journals, ledger, expenses, invoices, contacts, products, accounts, sales, hrm, attendance, holidays, memos → استخدام server functions الموجودة (`accounting.functions.ts`, `hrm.functions.ts`) بدل `mockStore`.
+- **دفعة B** — بوابة الشركة المحاسبية (11 ملف): firm.clients/engagements/tasks/time/staff/roles/audit/reports/invoices/documents/settings → `firm.functions.ts`.
+- **دفعة C** — Super Admin (6 ملف): cms + ai dashboards → `cms.functions.ts` + `saas.functions.ts`.
+- **دفعة D** — حذف مجلد `src/lib/mock/` بالكامل وأي `mockStore`/`aiStore`/`cmsStore` باقٍ.
+- إضافة seed حقيقي في `prisma/seed.ts` (يوجد بالفعل) لبيانات تجريبية أولية لحساب المستخدم الأول عند التسجيل، بدل الـmock.
 
-**Module 1 — Firm.** Concretely:
+## Technical details
 
-- Prisma additions: `FirmClient`, `FirmStaff`, `FirmEngagement`, `FirmTask`, `FirmTimeEntry`, `FirmDocument` (workspace-scoped, RLS via existing `withTenant`). `Role` / `Permission` / `RolePermission` already exist and back `firm.roles`.
-- Migration `prisma/migrations/00000000000004_firm_module/migration.sql` with GRANT + RLS statements.
-- `src/lib/firm.functions.ts` — list/upsert/delete + assignment mutations for each entity, all guarded by `FIRM_ADMIN` / `SUPER_ADMIN`.
-- Rewrites of: `firm.index.tsx`, `firm.clients.tsx`, `firm.clients-new.tsx`, `firm.staff.tsx`, `firm.tasks.tsx`, `firm.engagements.tsx`, `firm.time.tsx`, `firm.documents.tsx`, `firm.reports.tsx`, `firm.invoices.tsx`, `firm.audit.tsx`, `firm.settings.tsx`, `firm.roles.tsx`, `components/firm/FirmShell.tsx`, `components/firm/PlanEntitlementsDrawer.tsx`.
-- Delete `src/lib/mock/firm.tsx` and remove the `FirmProvider` from `src/routes/firm.tsx`.
-- Typecheck.
+- CSV encoding: UTF-8 with BOM (`\uFEFF`) + `;` delimiter (Finnish locale).
+- Zod schema لكل سطر:
+  ```ts
+  z.object({
+    pvm: z.string(), tili: z.string(), debet: z.number().nullable(),
+    kredit: z.number().nullable(), kohdennus: z.string().nullable(),
+    alv: z.number().nullable(), asiakasToimittaja: z.string().nullable(),
+    selite: z.string(),
+  })
+  ```
+- OCR fallback: إذا فشل Tesseract على السيرفر → إرسال صورة base64 كـ image_url إلى `google/gemini-2.5-flash` مباشرة لاستخراج الحقول (vision).
+- Prisma migration جديدة `00000000000005_receipt_extractions` + GRANTs + RLS.
+- `structuredOutputs: false` (Gemini)، مع fallback parsing عبر `NoObjectGeneratedError`.
 
-Subsequent turns will each carry one more module in the table above using the same recipe. Please confirm this order (or reorder) and I will start immediately with Module 1 — Firm.
+## استفسار قبل البدء
+
+هل تريد أن أبدأ بالمرحلة 1 الآن (OCR→CSV — أقصر مسار لقيمة فورية)، ثم أتابع بالمرحلة 2 و3 على رسائل لاحقة؟ أو تفضّل أن أنفذ كل شيء في هذه الجلسة (سيستغرق وقتاً أطول بكثير وقد يتطلب عدة تدويرات لتصحيح الأخطاء)؟
