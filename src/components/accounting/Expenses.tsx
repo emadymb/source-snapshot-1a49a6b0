@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Plus, Trash2, Pencil, Receipt } from "lucide-react";
+import { Plus, Trash2, Pencil, Receipt, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { PageHeading } from "@/components/PagePlaceholder";
 import { Button } from "@/components/ui/button";
@@ -10,23 +11,39 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataToolbar, StatusPill } from "./DataToolbar";
-import { store, useStore, fmt, type Expense } from "@/lib/mock/store";
+import { fmt } from "@/lib/format";
+import {
+  listExpenses, upsertExpense, deleteExpense, setExpenseStatus,
+  type ExpenseDTO, type UiExpenseStatus,
+} from "@/lib/accounting.functions";
 
-const empty = (): Expense => ({ id: "", date: new Date().toISOString().slice(0, 10), vendor: "", category: "Other", amount: 0, vatRate: 24, status: "pending" });
+type Draft = { id?: string; date: string; vendor: string; category: string; amount: number; vatRate: number; status: UiExpenseStatus; notes: string };
+
+const empty = (): Draft => ({ date: new Date().toISOString().slice(0, 10), vendor: "", category: "Other", amount: 0, vatRate: 24, status: "pending", notes: "" });
 const CATS = ["Travel", "Software", "Utilities", "Telecom", "Groceries", "Marketing", "Other"];
 
 export function ExpensesScreen() {
-  const expenses = useStore((s) => s.expenses);
-  const [q, setQ] = useState("");
-  const [status, setStatus] = useState("all");
-  const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<Expense>(empty());
+  const qc = useQueryClient();
+  const { data: expenses = [], isLoading } = useQuery({ queryKey: ["accounting", "expenses"], queryFn: () => listExpenses(), staleTime: 30_000 });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["accounting", "expenses"] });
+  const save = useMutation({
+    mutationFn: (d: Draft) => upsertExpense({ data: { id: d.id, date: d.date, vendor: d.vendor, category: d.category, amount: d.amount, vatRate: d.vatRate, notes: d.notes || null, status: d.status } }),
+    onSuccess: () => { invalidate(); toast.success("Expense saved"); setOpen(false); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const del = useMutation({ mutationFn: (id: string) => deleteExpense({ data: { id } }), onSuccess: () => { invalidate(); toast("Removed"); } });
+  const status = useMutation({ mutationFn: (v: { id: string; status: UiExpenseStatus }) => setExpenseStatus({ data: v }), onSuccess: invalidate });
 
-  const filtered = useMemo(() => expenses.filter((e) => {
-    if (status !== "all" && e.status !== status) return false;
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Draft>(empty());
+
+  const filtered = useMemo(() => expenses.filter((e: ExpenseDTO) => {
+    if (statusFilter !== "all" && e.status !== statusFilter) return false;
     if (!q) return true;
     return e.vendor.toLowerCase().includes(q.toLowerCase()) || e.category.toLowerCase().includes(q.toLowerCase());
-  }), [expenses, q, status]);
+  }), [expenses, q, statusFilter]);
 
   const byCategory = useMemo(() => {
     const m = new Map<string, number>();
@@ -34,18 +51,16 @@ export function ExpensesScreen() {
     return Array.from(m, ([category, amount]) => ({ category, amount }));
   }, [expenses]);
 
-  const save = () => {
+  const submit = () => {
     if (!draft.vendor.trim() || draft.amount <= 0) return toast.error("Vendor and amount are required");
-    store.upsertExpense(draft);
-    toast.success(draft.id ? "Expense updated" : "Expense captured");
-    setOpen(false);
+    save.mutate(draft);
   };
 
-  const tone = (s: Expense["status"]) => s === "reimbursed" ? "success" : s === "approved" ? "info" : "warning";
+  const tone = (s: UiExpenseStatus) => s === "reimbursed" ? "success" : s === "approved" ? "info" : s === "rejected" ? "danger" : "warning";
 
   return (
     <div className="mx-auto max-w-6xl">
-      <PageHeading title="Expenses" description="Receipts, reimbursements, and category spend." icon={Receipt}
+      <PageHeading title="Expenses" description="Live receipts, reimbursements, and category spend." icon={Receipt}
         actions={<Button className="rounded-xl bg-gradient-primary text-primary-foreground shadow-[var(--shadow-glow)]" onClick={() => { setDraft(empty()); setOpen(true); }}><Plus className="me-1.5 size-4" /> Add expense</Button>} />
 
       <div className="mb-4 glass rounded-2xl border-glass-border p-6">
@@ -65,13 +80,14 @@ export function ExpensesScreen() {
 
       <div className="glass rounded-2xl border-glass-border p-6">
         <DataToolbar value={q} onChange={setQ} placeholder="Search vendor or category…">
-          <Select value={status} onValueChange={setStatus}>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="h-10 w-[160px] rounded-xl border-glass-border bg-glass"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="reimbursed">Reimbursed</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
         </DataToolbar>
@@ -89,6 +105,8 @@ export function ExpensesScreen() {
               </tr>
             </thead>
             <tbody>
+              {isLoading && <tr><td colSpan={7} className="py-8 text-center text-muted-foreground"><Loader2 className="mx-auto size-4 animate-spin" /></td></tr>}
+              {!isLoading && filtered.length === 0 && <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">No expenses yet.</td></tr>}
               {filtered.map((e) => (
                 <tr key={e.id} className="border-b border-glass-border/60 last:border-0 hover:bg-secondary/40">
                   <td className="py-3 pr-4 text-muted-foreground">{e.date}</td>
@@ -99,8 +117,13 @@ export function ExpensesScreen() {
                   <td className="py-3 pr-4"><StatusPill tone={tone(e.status)}>{e.status}</StatusPill></td>
                   <td className="py-3">
                     <div className="flex justify-end gap-1">
-                      <Button size="icon" variant="ghost" className="size-8" onClick={() => { setDraft(e); setOpen(true); }}><Pencil className="size-4" /></Button>
-                      <Button size="icon" variant="ghost" className="size-8 text-destructive" onClick={() => { store.deleteExpense(e.id); toast("Removed"); }}><Trash2 className="size-4" /></Button>
+                      {e.status === "pending" && (
+                        <Button size="icon" variant="ghost" className="size-8" title="Approve" onClick={() => status.mutate({ id: e.id, status: "approved" })}>
+                          <CheckCircle2 className="size-4 text-emerald-600" />
+                        </Button>
+                      )}
+                      <Button size="icon" variant="ghost" className="size-8" onClick={() => { setDraft({ id: e.id, date: e.date, vendor: e.vendor, category: e.category, amount: e.amount, vatRate: e.vatRate, status: e.status, notes: e.notes ?? "" }); setOpen(true); }}><Pencil className="size-4" /></Button>
+                      <Button size="icon" variant="ghost" className="size-8 text-destructive" onClick={() => del.mutate(e.id)}><Trash2 className="size-4" /></Button>
                     </div>
                   </td>
                 </tr>
@@ -123,21 +146,23 @@ export function ExpensesScreen() {
               </Select>
             </div>
             <div><Label>Status</Label>
-              <Select value={draft.status} onValueChange={(v: Expense["status"]) => setDraft({ ...draft, status: v })}>
+              <Select value={draft.status} onValueChange={(v: UiExpenseStatus) => setDraft({ ...draft, status: v })}>
                 <SelectTrigger className="mt-1.5 rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="reimbursed">Reimbursed</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div><Label>Amount (€)</Label><Input type="number" value={draft.amount} onChange={(e) => setDraft({ ...draft, amount: +e.target.value })} className="mt-1.5 rounded-xl" /></div>
             <div><Label>VAT %</Label><Input type="number" value={draft.vatRate} onChange={(e) => setDraft({ ...draft, vatRate: +e.target.value })} className="mt-1.5 rounded-xl" /></div>
+            <div className="md:col-span-2"><Label>Notes</Label><Input value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} className="mt-1.5 rounded-xl" /></div>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button className="bg-gradient-primary text-primary-foreground" onClick={save}>Save</Button>
+            <Button className="bg-gradient-primary text-primary-foreground" disabled={save.isPending} onClick={submit}>{save.isPending ? "Saving…" : "Save"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
