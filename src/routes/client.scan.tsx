@@ -62,7 +62,21 @@ function ScanPage() {
       </header>
 
       {!data && (
-        <OcrUploader onResult={(r) => setData(parseReceipt(r.text))} />
+        <OcrUploader
+          onResult={(r) => {
+            const first = r.rows[0];
+            if (!first) return;
+            setData({
+              vendor: r.supplier ?? first.asiakasToimittaja ?? "",
+              date: first.pvm,
+              amount:
+                r.totalAmount ??
+                r.rows.reduce((s, x) => s + (x.debet ?? x.kredit ?? 0), 0),
+              vatRate: first.alv ?? 24,
+              category: first.selite || "Office supplies",
+            });
+          }}
+        />
       )}
 
       {data && (
