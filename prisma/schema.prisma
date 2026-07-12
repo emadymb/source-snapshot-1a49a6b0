@@ -1,0 +1,1043 @@
+// Fiksu database schema (PostgreSQL + Prisma)
+// NOTE: models below the Profile model (module tables) use plain scalar
+// workspace_id / company_id UUID columns (no Prisma relation attributes) so
+// tenant isolation is enforced by Postgres RLS (can_access_workspace /
+// can_access_company) rather than FK-navigation. Keeps migrations flat and RLS
+// uniform across every module.
+// Auth is self-hosted (JWT + refresh sessions) — NO Supabase.
+//
+// Row Level Security, the can_access_workspace / can_access_company functions,
+// and GRANTs live in prisma/migrations (raw SQL) so the tenant isolation
+// travels with the schema.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Platform-wide role. Fine-grained, per-module permissions are layered on top
+/// via WorkspaceMember.permissions and the roles/permissions module.
+enum AppRole {
+  SUPER_ADMIN
+  FIRM_ADMIN
+  ACCOUNTANT
+  CLIENT_OWNER
+  CLIENT_EMPLOYEE
+  CLIENT_TEAM_MEMBER
+}
+
+enum WorkspaceKind {
+  FIRM
+  CLIENT
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  fullName      String    @map("full_name")
+  role          AppRole   @default(CLIENT_OWNER)
+  isActive      Boolean   @default(true) @map("is_active")
+  emailVerified Boolean   @default(false) @map("email_verified")
+  lastLoginAt   DateTime? @map("last_login_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  profile          Profile?
+  sessions         Session[]
+  workspaceMembers WorkspaceMember[]
+  ownedWorkspaces  Workspace[]       @relation("WorkspaceOwner")
+
+  @@map("users")
+}
+
+/// Refresh-token sessions. One row per active refresh token; rotated on refresh
+/// and deleted on logout.
+model Session {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  refreshTokenHash String    @unique @map("refresh_token_hash")
+  userAgent        String?   @map("user_agent")
+  ip               String?
+  expiresAt        DateTime  @map("expires_at")
+  revokedAt        DateTime? @map("revoked_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// A tenant. FIRM workspaces belong to an accounting practice; CLIENT
+/// workspaces belong to an SME. Every tenant-scoped row carries workspace_id.
+model Workspace {
+  id        String        @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String        @unique
+  kind      WorkspaceKind @default(CLIENT)
+  ownerId   String?       @map("owner_id") @db.Uuid
+  isActive  Boolean       @default(true) @map("is_active")
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  owner     User?             @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  companies Company[]
+  members   WorkspaceMember[]
+  profiles  Profile[]
+
+  @@map("workspaces")
+}
+
+/// A legal entity inside a workspace. Company-scoped rows carry company_id.
+model Company {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @map("workspace_id") @db.Uuid
+  name         String
+  businessId   String?  @map("business_id") // Y-tunnus / VAT id
+  country      String   @default("FI")
+  baseCurrency String   @default("EUR") @map("base_currency")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  profiles  Profile[]
+
+  @@index([workspaceId])
+  @@map("companies")
+}
+
+/// Membership of a user in a workspace, with the role in that workspace and an
+/// optional JSON map of granular module permissions.
+model WorkspaceMember {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  role        AppRole
+  permissions Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@map("workspace_members")
+}
+
+/// Links a user to the workspace/company they currently have active, plus
+/// profile fields (avatar, locale, phone).
+model Profile {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @unique @map("user_id") @db.Uuid
+  activeWorkspaceId String?  @map("active_workspace_id") @db.Uuid
+  activeCompanyId   String?  @map("active_company_id") @db.Uuid
+  avatarUrl         String?  @map("avatar_url")
+  phone             String?
+  locale            String   @default("en")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeWorkspace Workspace? @relation(fields: [activeWorkspaceId], references: [id])
+  activeCompany   Company?   @relation(fields: [activeCompanyId], references: [id])
+
+  @@map("profiles")
+}
+
+// ============================================================================
+// Enums (module domain)
+// ============================================================================
+enum ContentStatus {
+  PUBLISHED
+  DRAFT
+  ARCHIVED
+}
+
+enum PlanKind {
+  FREE
+  PAID
+  PRIVATE
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+  ONE_TIME
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+enum PeppolStatus {
+  NOT_SENT
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PayrollStatus {
+  DRAFT
+  APPROVED
+  PAID
+}
+
+enum SettingScope {
+  PLATFORM
+  WORKSPACE
+}
+
+// ============================================================================
+// RBAC — granular roles & permissions (layered on top of AppRole)
+// ============================================================================
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String?  @map("workspace_id") @db.Uuid
+  name        String
+  description String?
+  isSystem    Boolean  @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  rolePermissions RolePermission[]
+
+  @@index([workspaceId])
+  @@map("roles")
+}
+
+model Permission {
+  id     String @id @default(uuid()) @db.Uuid
+  key    String @unique // e.g. "accounting.invoice.create"
+  module String
+  label  String
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ============================================================================
+// CMS module
+// ============================================================================
+model Page {
+  id              String        @id @default(uuid()) @db.Uuid
+  workspaceId     String        @map("workspace_id") @db.Uuid
+  title           String
+  slug            String
+  content         String        @default("")
+  status          ContentStatus @default(DRAFT)
+  metaTitle       String        @default("") @map("meta_title")
+  metaDescription String        @default("") @map("meta_description")
+  sortOrder       Int           @default(0) @map("sort_order")
+  createdBy       String?       @map("created_by") @db.Uuid
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+  @@map("pages")
+}
+
+model BlogCategory {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  name        String
+  slug        String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id            String        @id @default(uuid()) @db.Uuid
+  workspaceId   String        @map("workspace_id") @db.Uuid
+  title         String
+  slug          String
+  excerpt       String        @default("")
+  content       String        @default("")
+  featuredImage String?       @map("featured_image")
+  categoryId    String?       @map("category_id") @db.Uuid
+  tags          String[]      @default([])
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?     @map("published_at")
+  authorId      String?       @map("author_id") @db.Uuid
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+  @@map("blog_posts")
+}
+
+model Menu {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  name        String
+  location    String   @default("header")
+  items       Json     @default("[]")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([workspaceId])
+  @@map("menus")
+}
+
+model Theme {
+  id              String  @id @default(uuid()) @db.Uuid
+  workspaceId     String  @unique @map("workspace_id") @db.Uuid
+  primaryColor    String  @default("#6366f1") @map("primary_color")
+  darkModeEnabled Boolean @default(true) @map("dark_mode_enabled")
+  rtlEnabled      Boolean @default(false) @map("rtl_enabled")
+
+  @@map("themes")
+}
+
+model SeoSetting {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  path        String
+  title       String   @default("")
+  description String   @default("")
+  keywords    String   @default("")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, path])
+  @@index([workspaceId])
+  @@map("seo_settings")
+}
+
+// ============================================================================
+// SaaS / Superadmin module (plans, subscriptions, billing)
+// ============================================================================
+model SubscriptionPlan {
+  id           String          @id @default(uuid()) @db.Uuid
+  name         String
+  slug         String          @unique
+  kind         PlanKind        @default(PAID)
+  interval     BillingInterval @default(MONTHLY)
+  priceCents   Int             @default(0) @map("price_cents")
+  currency     String          @default("EUR")
+  trialDays    Int             @default(0) @map("trial_days")
+  maxUsers     Int?            @map("max_users")
+  maxCompanies Int?            @map("max_companies")
+  maxInvoices  Int?            @map("max_invoices")
+  entitlements Json            @default("{}")
+  isActive     Boolean         @default(true) @map("is_active")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@map("subscription_plans")
+}
+
+model Subscription {
+  id          String             @id @default(uuid()) @db.Uuid
+  workspaceId String             @map("workspace_id") @db.Uuid
+  companyId   String?            @map("company_id") @db.Uuid
+  planId      String             @map("plan_id") @db.Uuid
+  status      SubscriptionStatus @default(TRIALING)
+  startedAt   DateTime           @default(now()) @map("started_at")
+  endsAt      DateTime?          @map("ends_at")
+  autoRenew   Boolean            @default(true) @map("auto_renew")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  @@index([workspaceId])
+  @@map("subscriptions")
+}
+
+model SubscriptionRequest {
+  id          String        @id @default(uuid()) @db.Uuid
+  workspaceId String        @map("workspace_id") @db.Uuid
+  planId      String        @map("plan_id") @db.Uuid
+  status      RequestStatus @default(PENDING)
+  note        String?
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("subscription_requests")
+}
+
+model PaymentGateway {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  provider  String // stripe | paypal | razorpay | pesapal | paystack | flutterwave | offline
+  config    Json     @default("{}")
+  isActive  Boolean  @default(false) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("payment_gateways")
+}
+
+model Transaction {
+  id             String   @id @default(uuid()) @db.Uuid
+  workspaceId    String   @map("workspace_id") @db.Uuid
+  subscriptionId String?  @map("subscription_id") @db.Uuid
+  amountCents    Int      @map("amount_cents")
+  currency       String   @default("EUR")
+  provider       String
+  status         String   @default("pending")
+  reference      String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("transactions")
+}
+
+// ============================================================================
+// Accounting & E-Invoicing module
+// ============================================================================
+model ChartOfAccount {
+  id        String      @id @default(uuid()) @db.Uuid
+  companyId String      @map("company_id") @db.Uuid
+  code      String
+  name      String
+  type      AccountType
+  parentId  String?     @map("parent_id") @db.Uuid
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  @@unique([companyId, code])
+  @@index([companyId])
+  @@map("chart_of_accounts")
+}
+
+model Customer {
+  id        String   @id @default(uuid()) @db.Uuid
+  companyId String   @map("company_id") @db.Uuid
+  name      String
+  vatId     String?  @map("vat_id")
+  country   String   @default("FI")
+  email     String?
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([companyId])
+  @@map("customers")
+}
+
+model Invoice {
+  id            String        @id @default(uuid()) @db.Uuid
+  companyId     String        @map("company_id") @db.Uuid
+  customerId    String?       @map("customer_id") @db.Uuid
+  number        String
+  issueDate     DateTime      @default(now()) @map("issue_date")
+  dueDate       DateTime?     @map("due_date")
+  status        InvoiceStatus @default(DRAFT)
+  currency      String        @default("EUR")
+  subtotalCents Int           @default(0) @map("subtotal_cents")
+  taxCents      Int           @default(0) @map("tax_cents")
+  totalCents    Int           @default(0) @map("total_cents")
+  notes         String?
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  items InvoiceItem[]
+  xml   InvoiceXml?
+
+  @@unique([companyId, number])
+  @@index([companyId])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id             String @id @default(uuid()) @db.Uuid
+  invoiceId      String @map("invoice_id") @db.Uuid
+  description    String
+  qty            Float  @default(1)
+  unitPriceCents Int    @map("unit_price_cents")
+  vatRate        Float  @default(25.5) @map("vat_rate")
+  lineTotalCents Int    @map("line_total_cents")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model InvoiceXml {
+  id           String       @id @default(uuid()) @db.Uuid
+  invoiceId    String       @unique @map("invoice_id") @db.Uuid
+  format       String       @default("UBL") // UBL | FINVOICE
+  xml          String
+  peppolStatus PeppolStatus @default(NOT_SENT) @map("peppol_status")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_xml")
+}
+
+// Received e-invoices (inbound) — Finvoice/UBL from customers/partners.
+model InboundEInvoice {
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String   @map("company_id") @db.Uuid
+  format        String   @default("UBL")
+  sourceRef     String?  @map("source_ref") // partner id / message id
+  sellerName    String   @map("seller_name")
+  sellerVatId   String?  @map("seller_vat_id")
+  invoiceNumber String   @map("invoice_number")
+  issueDate     DateTime @map("issue_date")
+  dueDate       DateTime? @map("due_date")
+  currency      String   @default("EUR")
+  totalCents    Int      @default(0) @map("total_cents")
+  taxCents      Int      @default(0) @map("tax_cents")
+  status        String   @default("RECEIVED") // RECEIVED | APPROVED | REJECTED | PAID
+  xml           String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([companyId])
+  @@index([companyId, invoiceNumber])
+  @@map("inbound_einvoices")
+}
+
+// Per-company e-invoice dispatch settings.
+model EInvoiceSettings {
+  companyId    String   @id @map("company_id") @db.Uuid
+  webhookUrl   String?  @map("webhook_url")
+  defaultFormat String  @default("FINVOICE") @map("default_format")
+  autoSend     Boolean  @default(false) @map("auto_send")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("einvoice_settings")
+}
+
+
+model JournalEntry {
+  id              String   @id @default(uuid()) @db.Uuid
+  companyId       String   @map("company_id") @db.Uuid
+  date            DateTime @default(now())
+  memo            String?
+  debitAccountId  String?  @map("debit_account_id") @db.Uuid
+  creditAccountId String?  @map("credit_account_id") @db.Uuid
+  amountCents     Int      @map("amount_cents")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([companyId])
+  @@map("journal_entries")
+}
+
+// ============================================================================
+// AI module
+// ============================================================================
+model AiConversation {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  title       String   @default("New chat")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  messages AiMessage[]
+
+  @@index([workspaceId])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  role           String // user | assistant | system
+  content        String
+  attachments    Json     @default("[]")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("ai_messages")
+}
+
+model AiUsageLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String?  @map("workspace_id") @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  model       String
+  kind        String   @default("chat") // chat | ocr
+  tokensIn    Int      @default(0) @map("tokens_in")
+  tokensOut   Int      @default(0) @map("tokens_out")
+  costCents   Float    @default(0) @map("cost_cents")
+  latencyMs   Int      @default(0) @map("latency_ms")
+  success     Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("ai_usage_logs")
+}
+
+model Lead {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String?  @map("workspace_id") @db.Uuid
+  name        String
+  email       String?
+  phone       String?
+  status      String   @default("new")
+  source      String   @default("widget")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("leads")
+}
+
+// ============================================================================
+// HRM & Payroll module
+// ============================================================================
+model Employee {
+  id              String   @id @default(uuid()) @db.Uuid
+  workspaceId     String   @map("workspace_id") @db.Uuid
+  companyId       String?  @map("company_id") @db.Uuid
+  userId          String?  @map("user_id") @db.Uuid
+  fullName        String   @map("full_name")
+  email           String?
+  department      String?
+  position        String?
+  baseSalaryCents Int      @default(0) @map("base_salary_cents")
+  hireDate        DateTime @default(now()) @map("hire_date")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([workspaceId])
+  @@map("employees")
+}
+
+model Attendance {
+  id         String    @id @default(uuid()) @db.Uuid
+  employeeId String    @map("employee_id") @db.Uuid
+  date       DateTime  @default(now())
+  checkIn    DateTime? @map("check_in")
+  checkOut   DateTime? @map("check_out")
+  note       String?
+
+  @@index([employeeId])
+  @@map("attendance")
+}
+
+model LeaveType {
+  id          String @id @default(uuid()) @db.Uuid
+  workspaceId String @map("workspace_id") @db.Uuid
+  name        String
+  annualDays  Int    @default(0) @map("annual_days")
+
+  @@index([workspaceId])
+  @@map("leave_types")
+}
+
+model Leave {
+  id          String      @id @default(uuid()) @db.Uuid
+  workspaceId String      @map("workspace_id") @db.Uuid
+  employeeId  String      @map("employee_id") @db.Uuid
+  leaveTypeId String?     @map("leave_type_id") @db.Uuid
+  startDate   DateTime    @map("start_date")
+  endDate     DateTime    @map("end_date")
+  status      LeaveStatus @default(PENDING)
+  reason      String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("leaves")
+}
+
+model Holiday {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  name        String
+  date        DateTime
+
+  @@index([workspaceId])
+  @@map("holidays")
+}
+
+model Payroll {
+  id              String        @id @default(uuid()) @db.Uuid
+  workspaceId     String        @map("workspace_id") @db.Uuid
+  employeeId      String        @map("employee_id") @db.Uuid
+  month           Int
+  year            Int
+  baseCents       Int           @default(0) @map("base_cents")
+  allowancesCents Int           @default(0) @map("allowances_cents")
+  deductionsCents Int           @default(0) @map("deductions_cents")
+  netCents        Int           @default(0) @map("net_cents")
+  status          PayrollStatus @default(DRAFT)
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  allowances PayrollAllowance[]
+  deductions PayrollDeduction[]
+
+  @@unique([employeeId, month, year])
+  @@index([workspaceId])
+  @@map("payrolls")
+}
+
+model PayrollAllowance {
+  id          String @id @default(uuid()) @db.Uuid
+  payrollId   String @map("payroll_id") @db.Uuid
+  label       String
+  amountCents Int    @map("amount_cents")
+
+  payroll Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+
+  @@index([payrollId])
+  @@map("payroll_allowances")
+}
+
+model PayrollDeduction {
+  id          String @id @default(uuid()) @db.Uuid
+  payrollId   String @map("payroll_id") @db.Uuid
+  label       String
+  amountCents Int    @map("amount_cents")
+
+  payroll Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+
+  @@index([payrollId])
+  @@map("payroll_deductions")
+}
+
+model Todo {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @map("workspace_id") @db.Uuid
+  userId      String?   @map("user_id") @db.Uuid
+  title       String
+  done        Boolean   @default(false)
+  dueDate     DateTime? @map("due_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("todos")
+}
+
+model Memo {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  authorId    String?  @map("author_id") @db.Uuid
+  title       String
+  body        String   @default("")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("memos")
+}
+
+model Reminder {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  title       String
+  remindAt    DateTime @map("remind_at")
+  recurrence  String   @default("once") // once | daily | weekly | monthly
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("reminders")
+}
+
+model Message {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  senderId    String?  @map("sender_id") @db.Uuid
+  subject     String
+  body        String   @default("")
+  audience    String   @default("all")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@map("messages")
+}
+
+// ============================================================================
+// Documents module
+// ============================================================================
+model Document {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  companyId   String?  @map("company_id") @db.Uuid
+  category    String   @default("receipts") // receipts | invoices | payroll | contracts
+  name        String
+  path        String
+  mime        String   @default("application/octet-stream")
+  sizeBytes   Int      @default(0) @map("size_bytes")
+  uploadedBy  String?  @map("uploaded_by") @db.Uuid
+  linkedType  String?  @map("linked_type")
+  linkedId    String?  @map("linked_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  versions DocumentVersion[]
+
+  @@index([workspaceId])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id         String   @id @default(uuid()) @db.Uuid
+  documentId String   @map("document_id") @db.Uuid
+  version    Int      @default(1)
+  path       String
+  note       String?
+  createdBy  String?  @map("created_by") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("document_versions")
+}
+
+// ============================================================================
+// Reports / Audit / System
+// ============================================================================
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String?  @map("workspace_id") @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  action      String
+  entity      String
+  entityId    String?  @map("entity_id")
+  changes     Json     @default("{}")
+  ip          String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+model Setting {
+  id          String       @id @default(uuid()) @db.Uuid
+  scope       SettingScope @default(PLATFORM)
+  workspaceId String?      @map("workspace_id") @db.Uuid
+  key         String
+  value       Json         @default("{}")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  @@unique([scope, workspaceId, key])
+  @@map("settings")
+}
+
+model Backup {
+  id        String   @id @default(uuid()) @db.Uuid
+  label     String
+  sizeBytes Int      @default(0) @map("size_bytes")
+  location  String   @default("local")
+  status    String   @default("completed")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("backups")
+}
+
+// ===========================================================================
+// Firm module — clients, staff, engagements, tasks, invoices, roles.
+// Every table is workspace-scoped (RLS via can_access_workspace).
+// ===========================================================================
+
+enum FirmStaffStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum FirmClientStatus {
+  ACTIVE
+  ONBOARDING
+  PAUSED
+  CHURNED
+}
+
+enum FirmEngagementType {
+  MONTHLY_BOOKKEEPING
+  ANNUAL_CLOSE
+  VAT_RETURN
+  PAYROLL
+  ADVISORY
+}
+
+enum FirmEngagementStatus {
+  DRAFT
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+}
+
+enum FirmTaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum FirmTaskPriority {
+  LOW
+  MED
+  HIGH
+  URGENT
+}
+
+enum FirmInvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+}
+
+model FirmRoleDef {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  name        String
+  color       String   @default("sky")
+  description String   @default("")
+  permissions String[] @default([])
+  isSystem    Boolean  @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([workspaceId])
+  @@map("firm_role_defs")
+}
+
+model FirmStaff {
+  id           String          @id @default(uuid()) @db.Uuid
+  workspaceId  String          @map("workspace_id") @db.Uuid
+  name         String
+  email        String
+  roleId       String?         @map("role_id") @db.Uuid
+  status       FirmStaffStatus @default(ACTIVE)
+  clientIds    String[]        @default([]) @map("client_ids") @db.Uuid
+  billableRate Float           @default(0) @map("billable_rate")
+  utilization  Int             @default(0)
+  avatarSeed   String          @default("") @map("avatar_seed")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, email])
+  @@index([workspaceId])
+  @@map("firm_staff")
+}
+
+model FirmClientCo {
+  id             String           @id @default(uuid()) @db.Uuid
+  workspaceId    String           @map("workspace_id") @db.Uuid
+  name           String
+  contact        String           @default("")
+  email          String           @default("")
+  vatId          String           @default("") @map("vat_id")
+  industry       String           @default("")
+  plan           String           @default("Starter")
+  mrr            Float            @default(0)
+  status         FirmClientStatus @default(ACTIVE)
+  openTasks      Int              @default(0) @map("open_tasks")
+  overdue        Int              @default(0)
+  primaryStaffId String?          @map("primary_staff_id") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  @@index([workspaceId])
+  @@map("firm_client_cos")
+}
+
+model FirmEngagement {
+  id           String               @id @default(uuid()) @db.Uuid
+  workspaceId  String               @map("workspace_id") @db.Uuid
+  clientId     String               @map("client_id") @db.Uuid
+  title        String
+  type         FirmEngagementType   @default(MONTHLY_BOOKKEEPING)
+  status       FirmEngagementStatus @default(DRAFT)
+  startDate    DateTime             @map("start_date") @db.Date
+  endDate      DateTime?            @map("end_date") @db.Date
+  budgetHours  Int                  @default(0) @map("budget_hours")
+  spentHours   Int                  @default(0) @map("spent_hours")
+  fee          Float                @default(0)
+  leadStaffId  String?              @map("lead_staff_id") @db.Uuid
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+
+  @@index([workspaceId])
+  @@index([workspaceId, clientId])
+  @@map("firm_engagements")
+}
+
+model FirmTask {
+  id            String           @id @default(uuid()) @db.Uuid
+  workspaceId   String           @map("workspace_id") @db.Uuid
+  clientId      String           @map("client_id") @db.Uuid
+  engagementId  String?          @map("engagement_id") @db.Uuid
+  assigneeId    String?          @map("assignee_id") @db.Uuid
+  title         String
+  status        FirmTaskStatus   @default(TODO)
+  priority      FirmTaskPriority @default(MED)
+  dueDate       DateTime?        @map("due_date") @db.Date
+  hours         Float            @default(0)
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+
+  @@index([workspaceId])
+  @@index([workspaceId, assigneeId])
+  @@map("firm_tasks")
+}
+
+model FirmBillingInvoice {
+  id          String            @id @default(uuid()) @db.Uuid
+  workspaceId String            @map("workspace_id") @db.Uuid
+  number      String
+  clientId    String            @map("client_id") @db.Uuid
+  amount      Float             @default(0)
+  issued      DateTime          @db.Date
+  due         DateTime          @db.Date
+  status      FirmInvoiceStatus @default(DRAFT)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@unique([workspaceId, number])
+  @@index([workspaceId])
+  @@map("firm_billing_invoices")
+}
