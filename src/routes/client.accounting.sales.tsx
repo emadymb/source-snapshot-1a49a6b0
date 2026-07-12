@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { InvoicesScreen } from "@/components/accounting/Invoices";
 import { PageGate } from "@/components/entitlements/GateBanner";
 import { ExportMenu } from "@/components/client/ExportMenu";
 import { UploadReceiptsDialog } from "@/components/client/UploadReceiptsDialog";
-import { useStore, invoiceTotal } from "@/lib/mock/store";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { useClientRole } from "@/lib/client-role";
+import { listInvoices } from "@/lib/accounting.functions";
 
 export const Route = createFileRoute("/client/accounting/sales")({
   component: () => (
@@ -17,16 +18,15 @@ export const Route = createFileRoute("/client/accounting/sales")({
 });
 
 function SalesWrapper() {
-  const invoices = useStore((s) => s.invoices);
-  const contacts = useStore((s) => s.contacts);
+  const { data: invoices = [] } = useQuery({ queryKey: ["accounting", "invoices"], queryFn: () => listInvoices(), staleTime: 30_000 });
   const { can } = useClientRole();
   const rows = invoices.map((i) => ({
     number: i.number,
-    customer: contacts.find((c) => c.id === i.contactId)?.name ?? "—",
+    customer: i.customerName,
     issued: i.issueDate,
-    due: i.dueDate,
+    due: i.dueDate ?? "",
     status: i.status,
-    total: invoiceTotal(i).total.toFixed(2),
+    total: i.total.toFixed(2),
   }));
   return (
     <div className="space-y-3">
