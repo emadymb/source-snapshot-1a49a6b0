@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, ReceiptText, CheckCircle2, Upload } from "lucide-react";
+import { Plus, ReceiptText, CheckCircle2, Upload, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,10 @@ import { UploadReceiptsDialog } from "@/components/client/UploadReceiptsDialog";
 import { ExportMenu } from "@/components/client/ExportMenu";
 import { useClientRole, Can } from "@/lib/client-role";
 import { cn } from "@/lib/utils";
+import {
+  listExpenses, upsertExpense, setExpenseStatus, deleteExpense,
+  type ExpenseDTO, type UiExpenseStatus,
+} from "@/lib/accounting.functions";
 
 export const Route = createFileRoute("/client/accounting/expenses")({
   component: () => (
@@ -23,32 +28,36 @@ export const Route = createFileRoute("/client/accounting/expenses")({
   ),
 });
 
-type Expense = { id: string; date: string; vendor: string; category: string; amount: number; vat: number; status: "pending" | "approved" };
-
-const SEED: Expense[] = [
-  { id: "e1", date: "2026-03-08", vendor: "K-Supermarket",      category: "Groceries", amount: 48.20,  vat: 14, status: "approved" },
-  { id: "e2", date: "2026-03-07", vendor: "Teboil",             category: "Fuel",      amount: 62.10,  vat: 24, status: "approved" },
-  { id: "e3", date: "2026-03-06", vendor: "Ravintola Savoy",    category: "Meals",     amount: 124.00, vat: 14, status: "pending"  },
-  { id: "e4", date: "2026-03-05", vendor: "Verkkokauppa.com",   category: "Software",  amount: 249.00, vat: 24, status: "approved" },
-  { id: "e5", date: "2026-03-03", vendor: "R-Kioski",           category: "Office",    amount: 8.90,   vat: 24, status: "pending"  },
-  { id: "e6", date: "2026-03-01", vendor: "Alko",               category: "Meals",     amount: 42.00,  vat: 24, status: "approved" },
-  { id: "e7", date: "2026-02-27", vendor: "Lidl",               category: "Groceries", amount: 62.50,  vat: 14, status: "approved" },
-  { id: "e8", date: "2026-02-22", vendor: "Neste",              category: "Fuel",      amount: 88.20,  vat: 24, status: "approved" },
-  { id: "e9", date: "2026-02-15", vendor: "Adobe",              category: "Software",  amount: 59.99,  vat: 24, status: "pending"  },
-];
+type Draft = { date: string; vendor: string; category: string; amount: number; vatRate: number };
 
 function ExpensesPage() {
   const { t, lang } = useI18n();
   const { can } = useClientRole();
-  const [items, setItems] = useState<Expense[]>(SEED);
+  const qc = useQueryClient();
+  const { data: items = [], isLoading } = useQuery({ queryKey: ["accounting", "expenses"], queryFn: () => listExpenses(), staleTime: 30_000 });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["accounting", "expenses"] });
+  const create = useMutation({
+    mutationFn: (d: Draft) => upsertExpense({ data: { date: d.date, vendor: d.vendor, category: d.category, amount: d.amount, vatRate: d.vatRate, status: "pending" } }),
+    onSuccess: () => { invalidate(); toast.success("Expense added"); setOpen(false); setDraft({ ...draft, vendor: "", amount: 0 }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const approveMut = useMutation({
+    mutationFn: (id: string) => setExpenseStatus({ data: { id, status: "approved" as UiExpenseStatus } }),
+    onSuccess: () => { invalidate(); toast.success("Expense approved"); },
+  });
+  const del = useMutation({
+    mutationFn: (id: string) => deleteExpense({ data: { id } }),
+    onSuccess: () => { invalidate(); toast("Removed"); },
+  });
+
   const [filter, setFilter] = useRangeFilter();
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<Expense>({
-    id: "", date: new Date().toISOString().slice(0, 10), vendor: "", category: "Meals", amount: 0, vat: 24, status: "pending",
+  const [draft, setDraft] = useState<Draft>({
+    date: new Date().toISOString().slice(0, 10), vendor: "", category: "Meals", amount: 0, vatRate: 24,
   });
 
   const filtered = useMemo(
-    () => items.filter((e) =>
+    () => items.filter((e: ExpenseDTO) =>
       matchesRangeFilter(e, filter, {
         text: (r) => `${r.vendor} ${r.category}`,
         date: (r) => r.date,
@@ -60,11 +69,6 @@ function ExpensesPage() {
 
   const fmt = (n: number) => new Intl.NumberFormat(lang === "ar" ? "ar-EG" : "en-FI", { style: "currency", currency: "EUR" }).format(n);
   const total = filtered.reduce((s, e) => s + e.amount, 0);
-
-  const approve = (id: string) => {
-    setItems((p) => p.map((e) => (e.id === id ? { ...e, status: "approved" } : e)));
-    toast.success("Expense approved");
-  };
 
   return (
     <div className="space-y-4">
@@ -82,7 +86,7 @@ function ExpensesPage() {
               { key: "date", label: "Date" },
               { key: "vendor", label: "Vendor" },
               { key: "category", label: "Category" },
-              { key: "vat", label: "VAT %" },
+              { key: "vatRate", label: "VAT %" },
               { key: "amount", label: "Amount", get: (r) => r.amount.toFixed(2) },
               { key: "status", label: "Status" },
             ]}
@@ -120,7 +124,7 @@ function ExpensesPage() {
                     </div>
                     <div>
                       <Label>{t("client.scan.vat")}</Label>
-                      <Select value={String(draft.vat)} onValueChange={(v) => setDraft({ ...draft, vat: Number(v) })}>
+                      <Select value={String(draft.vatRate)} onValueChange={(v) => setDraft({ ...draft, vatRate: Number(v) })}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>{[0,10,14,24].map(r => <SelectItem key={r} value={String(r)}>{r}%</SelectItem>)}</SelectContent>
                       </Select>
@@ -129,14 +133,12 @@ function ExpensesPage() {
                 </div>
                 <SheetFooter className="mt-4">
                   <Button className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
+                    disabled={create.isPending}
                     onClick={() => {
                       if (!draft.vendor || !draft.amount) return toast.error("Vendor and amount required");
-                      setItems((p) => [{ ...draft, id: `e${Date.now()}` }, ...p]);
-                      toast.success("Expense added");
-                      setOpen(false);
-                      setDraft({ ...draft, vendor: "", amount: 0 });
+                      create.mutate(draft);
                     }}>
-                    {t("common.save")}
+                    {create.isPending ? "Saving…" : t("common.save")}
                   </Button>
                 </SheetFooter>
               </SheetContent>
@@ -158,6 +160,9 @@ function ExpensesPage() {
       />
 
       <ul className="space-y-2">
+        {isLoading && (
+          <li className="rounded-2xl bg-white p-8 text-center text-sm text-muted-foreground"><Loader2 className="mx-auto size-4 animate-spin" /></li>
+        )}
         {filtered.length === 0 && (
           <li className="rounded-2xl bg-white p-8 text-center text-sm text-muted-foreground">No expenses match your filters.</li>
         )}
@@ -172,12 +177,17 @@ function ExpensesPage() {
               <p className="font-display text-sm font-semibold tabular-nums">{fmt(e.amount)}</p>
               <span className={cn(
                 "text-[10px] font-medium uppercase",
-                e.status === "approved" ? "text-emerald-600" : "text-amber-600",
+                e.status === "approved" || e.status === "reimbursed" ? "text-emerald-600" : e.status === "rejected" ? "text-destructive" : "text-amber-600",
               )}>{e.status}</span>
             </div>
             {e.status === "pending" && can("expense.approve") && (
-              <Button size="icon" variant="ghost" className="size-8" onClick={() => approve(e.id)} title="Approve">
+              <Button size="icon" variant="ghost" className="size-8" onClick={() => approveMut.mutate(e.id)} title="Approve">
                 <CheckCircle2 className="size-4 text-emerald-600" />
+              </Button>
+            )}
+            {can("expense.create") && (
+              <Button size="icon" variant="ghost" className="size-8 text-destructive" onClick={() => del.mutate(e.id)} title="Delete">
+                <Trash2 className="size-4" />
               </Button>
             )}
           </li>
