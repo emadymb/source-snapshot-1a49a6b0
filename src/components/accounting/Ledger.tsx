@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PageHeading } from "@/components/PagePlaceholder";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusPill } from "./DataToolbar";
-import { fmt } from "@/lib/mock/store";
+import { fmt } from "@/lib/format";
 import { listAccounts, listJournalEntries } from "@/lib/accounting.functions";
 
 export function LedgerScreen() {
