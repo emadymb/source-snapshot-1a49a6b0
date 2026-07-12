@@ -87,7 +87,7 @@ export function JournalsScreen() {
                   <td className="py-3">
                     <div className="flex justify-end gap-1">
                       <Button size="icon" variant="ghost" className="size-8"
-                        onClick={() => setDraft({ id: j.id, date: j.date, memo: j.memo ?? "", debitAccountId: j.debitAccountId ?? "", creditAccountId: j.creditAccountId ?? "", amount: j.amount }) || setOpen(true)}>
+                        onClick={() => { setDraft({ id: j.id, date: j.date, memo: j.memo ?? "", debitAccountId: j.debitAccountId ?? "", creditAccountId: j.creditAccountId ?? "", amount: j.amount }); setOpen(true); }}>
                         <Pencil className="size-4" />
                       </Button>
                       <Button size="icon" variant="ghost" className="size-8 text-destructive" onClick={() => del.mutate(j.id)}><Trash2 className="size-4" /></Button>
