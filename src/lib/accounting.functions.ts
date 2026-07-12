@@ -716,6 +716,16 @@ export const deleteExpense = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 // Receipt extractions (OCR history)
 // ---------------------------------------------------------------------------
+export interface ReceiptExtractionRow {
+  pvm?: string;
+  tili?: string;
+  debet?: number | null;
+  kredit?: number | null;
+  kohdennus?: string | null;
+  alv?: number | null;
+  asiakasToimittaja?: string | null;
+  selite?: string;
+}
 export interface ReceiptExtractionDTO {
   id: string;
   status: string;
@@ -724,7 +734,7 @@ export interface ReceiptExtractionDTO {
   currency: string;
   model: string;
   csvContent: string;
-  parsedRows: unknown;
+  parsedRows: ReceiptExtractionRow[];
   rowCount: number;
   createdAt: string;
   expenseId: string | null;
@@ -746,10 +756,9 @@ export const listReceiptExtractions = createServerFn({ method: "GET" }).handler(
         const linked = ids.length
           ? await tx.expense.findMany({ where: { receiptExtractionId: { in: ids } }, select: { id: true, receiptExtractionId: true } })
           : [];
-        const expByExt = new Map(linked.map((e) => [e.receiptExtractionId!, e.id]));
+        const expByExt = new Map<string, string>(linked.map((e) => [e.receiptExtractionId!, e.id]));
         return rows.map((r) => {
-          const parsed = r.parsedRows as unknown;
-          const count = Array.isArray(parsed) ? parsed.length : 0;
+          const parsed = (Array.isArray(r.parsedRows) ? r.parsedRows : []) as ReceiptExtractionRow[];
           return {
             id: r.id,
             status: r.status,
@@ -759,7 +768,7 @@ export const listReceiptExtractions = createServerFn({ method: "GET" }).handler(
             model: r.model,
             csvContent: r.csvContent,
             parsedRows: parsed,
-            rowCount: count,
+            rowCount: parsed.length,
             createdAt: r.createdAt.toISOString(),
             expenseId: expByExt.get(r.id) ?? null,
           };
