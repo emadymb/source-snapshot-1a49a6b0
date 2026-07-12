@@ -238,7 +238,7 @@ export const extractReceiptToCsv = createServerFn({ method: "POST" })
     const filename = `receipt-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`;
 
     // 3. Persist + notify the accountant when the user is signed in.
-    let id = crypto.randomUUID();
+    let id: string = crypto.randomUUID();
     let status: ExtractionResult["status"] = "draft";
     try {
       const { getSession, resolveWorkspaceId, resolveCompanyId } = await import(
