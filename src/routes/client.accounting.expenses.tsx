@@ -81,13 +81,13 @@ function ExpensesPage() {
           <ExportMenu
             title="Expenses"
             filenameBase="expenses"
-            rows={filtered}
+            rows={filtered as unknown as Record<string, unknown>[]}
             columns={[
               { key: "date", label: "Date" },
               { key: "vendor", label: "Vendor" },
               { key: "category", label: "Category" },
               { key: "vatRate", label: "VAT %" },
-              { key: "amount", label: "Amount", get: (r) => r.amount.toFixed(2) },
+              { key: "amount", label: "Amount", get: (r) => Number(r.amount).toFixed(2) },
               { key: "status", label: "Status" },
             ]}
           />
