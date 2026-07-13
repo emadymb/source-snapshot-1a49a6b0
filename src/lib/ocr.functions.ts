@@ -357,7 +357,9 @@ async function autoPostJournal(
 
   const codes = Array.from(new Set([...debits, ...credits].map((r) => r.tili)));
   const existing = await tx.chartOfAccount.findMany({ where: { companyId, code: { in: codes } } });
-  const byCode = new Map<string, { id: string; code: string }>(existing.map((a) => [a.code, a]));
+  const byCode = new Map<string, { id: string; code: string }>(
+    existing.map((a: { id: string; code: string }) => [a.code, a]),
+  );
   for (const code of codes) {
     if (byCode.has(code)) continue;
     const created = await tx.chartOfAccount.create({
