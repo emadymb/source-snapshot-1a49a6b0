@@ -1087,6 +1087,20 @@ export interface FinancialReports {
   balanceSheet: { assets: number; liabilities: number; equity: number };
 }
 
+export interface VatBreakdownRow { rate: number; net: number; vat: number; }
+export interface VatReportDTO {
+  asOf: string;
+  periodFrom: string | null;
+  periodTo: string | null;
+  sales: VatBreakdownRow[];      // output VAT (from invoices)
+  purchases: VatBreakdownRow[];  // input VAT (from expenses)
+  totals: {
+    salesNet: number; salesVat: number;
+    purchasesNet: number; purchasesVat: number;
+    payable: number; // salesVat - purchasesVat
+  };
+}
+
 async function computeReports(
   accounts: AccountDTO[],
   journals: JournalEntryDTO[],
@@ -1124,6 +1138,86 @@ async function computeReports(
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// VAT report (تقرير الضريبة) — output VAT from sales invoices, input VAT from
+// expenses, grouped by VAT rate. Net payable = salesVat - purchasesVat.
+// ---------------------------------------------------------------------------
+function groupVat(rows: Array<{ rate: number; net: number; vat: number }>): VatBreakdownRow[] {
+  const m = new Map<number, VatBreakdownRow>();
+  for (const r of rows) {
+    const g = m.get(r.rate) ?? { rate: r.rate, net: 0, vat: 0 };
+    g.net += r.net;
+    g.vat += r.vat;
+    m.set(r.rate, g);
+  }
+  return Array.from(m.values())
+    .map((g) => ({ rate: g.rate, net: Math.round(g.net * 100) / 100, vat: Math.round(g.vat * 100) / 100 }))
+    .sort((a, b) => b.rate - a.rate);
+}
+
+export const vatReport = createServerFn({ method: "GET" }).handler(async (): Promise<VatReportDTO> => {
+  const emptyTotals = { salesNet: 0, salesVat: 0, purchasesNet: 0, purchasesVat: 0, payable: 0 };
+  const emptyReport: VatReportDTO = {
+    asOf: new Date().toISOString().slice(0, 10),
+    periodFrom: null, periodTo: null, sales: [], purchases: [], totals: emptyTotals,
+  };
+  if (!dbConfigured()) return emptyReport;
+  try {
+    const { companyId, session } = await companyCtx();
+    const { withTenant } = await import("./db.server");
+    return await withTenant(session.userId, async (tx) => {
+      const [invoices, expenses] = await Promise.all([
+        tx.invoice.findMany({
+          where: { companyId, status: { in: ["SENT", "PAID", "OVERDUE"] } },
+          include: { items: true },
+        }),
+        tx.expense.findMany({ where: { companyId } }),
+      ]);
+      // Sales (output) VAT — from invoice items
+      const salesRows = invoices.flatMap((inv) =>
+        inv.items.map((it) => {
+          const net = (it.qty * it.unitPriceCents) / 100;
+          const vat = net * (it.vatRate / 100);
+          return { rate: it.vatRate, net, vat };
+        }),
+      );
+      // Purchases (input) VAT — from expenses (gross amounts stored)
+      const purchaseRows = expenses.map((e) => {
+        const gross = e.amountCents / 100;
+        const rate = e.vatRate;
+        const net = rate > 0 ? gross / (1 + rate / 100) : gross;
+        const vat = gross - net;
+        return { rate, net, vat };
+      });
+      const sales = groupVat(salesRows);
+      const purchases = groupVat(purchaseRows);
+      const salesNet = sales.reduce((s, r) => s + r.net, 0);
+      const salesVat = sales.reduce((s, r) => s + r.vat, 0);
+      const purchasesNet = purchases.reduce((s, r) => s + r.net, 0);
+      const purchasesVat = purchases.reduce((s, r) => s + r.vat, 0);
+      const dates = [
+        ...invoices.map((i) => i.issueDate.getTime()),
+        ...expenses.map((e) => e.date.getTime()),
+      ];
+      return {
+        asOf: new Date().toISOString().slice(0, 10),
+        periodFrom: dates.length ? new Date(Math.min(...dates)).toISOString().slice(0, 10) : null,
+        periodTo: dates.length ? new Date(Math.max(...dates)).toISOString().slice(0, 10) : null,
+        sales, purchases,
+        totals: {
+          salesNet: Math.round(salesNet * 100) / 100,
+          salesVat: Math.round(salesVat * 100) / 100,
+          purchasesNet: Math.round(purchasesNet * 100) / 100,
+          purchasesVat: Math.round(purchasesVat * 100) / 100,
+          payable: Math.round((salesVat - purchasesVat) * 100) / 100,
+        },
+      };
+    });
+  } catch {
+    return emptyReport;
+  }
+});
 
 export const financialReports = createServerFn({ method: "GET" }).handler(
   async (): Promise<FinancialReports> => {
