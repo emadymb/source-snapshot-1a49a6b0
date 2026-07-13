@@ -455,3 +455,122 @@ export const upsertFirmInvoice = createServerFn({ method: "POST" })
     await audit(session.userId, data.id ? "update" : "create", "firm.invoice", row.id);
     return { id: row.id };
   });
+
+// ---------------------------------------------------------------------------
+// Firm audit trail (plan / entitlement changes) — persisted to AuditLog.
+// ---------------------------------------------------------------------------
+export interface FirmAuditChangeDTO { featureId: string; from: unknown; to: unknown }
+export interface FirmAuditEntryDTO {
+  id: string;
+  at: string;
+  actorId: string;
+  actorName: string;
+  actorRole?: string;
+  workspaceId: string;
+  workspaceName: string;
+  kind: "plan.change" | "entitlement.override" | "entitlement.reset";
+  planFrom?: string;
+  planTo?: string;
+  changes: FirmAuditChangeDTO[];
+  note?: string;
+}
+
+const KIND_TO_ACTION: Record<FirmAuditEntryDTO["kind"], string> = {
+  "plan.change": "firm.plan.change",
+  "entitlement.override": "firm.entitlement.override",
+  "entitlement.reset": "firm.entitlement.reset",
+};
+const ACTION_TO_KIND: Record<string, FirmAuditEntryDTO["kind"]> = {
+  "firm.plan.change": "plan.change",
+  "firm.entitlement.override": "entitlement.override",
+  "firm.entitlement.reset": "entitlement.reset",
+};
+
+export const listFirmAuditEntries = createServerFn({ method: "GET" }).handler(
+  async (): Promise<FirmAuditEntryDTO[]> => {
+    if (!dbConfigured()) return [];
+    try {
+      const { session } = await requireFirmSession();
+      const { withTenant } = await import("./db.server");
+      return await withTenant(session.userId, async (tx) => {
+        const rows = await tx.auditLog.findMany({
+          where: { action: { in: Object.keys(ACTION_TO_KIND) } },
+          orderBy: { createdAt: "desc" },
+          take: 300,
+        });
+        return rows.map((r) => {
+          const c = (r.changes ?? {}) as Record<string, unknown>;
+          return {
+            id: r.id,
+            at: r.createdAt.toISOString(),
+            actorId: r.userId ?? "",
+            actorName: String(c.actorName ?? ""),
+            actorRole: c.actorRole ? String(c.actorRole) : undefined,
+            workspaceId: r.entityId ?? r.workspaceId ?? "",
+            workspaceName: String(c.workspaceName ?? ""),
+            kind: ACTION_TO_KIND[r.action] ?? "entitlement.override",
+            planFrom: c.planFrom ? String(c.planFrom) : undefined,
+            planTo: c.planTo ? String(c.planTo) : undefined,
+            changes: Array.isArray(c.changes) ? (c.changes as FirmAuditChangeDTO[]) : [],
+            note: c.note ? String(c.note) : undefined,
+          };
+        });
+      });
+    } catch { return []; }
+  },
+);
+
+const firmAuditIn = z.object({
+  workspaceId: z.string().uuid(),
+  workspaceName: z.string().default(""),
+  actorName: z.string().default(""),
+  actorRole: z.string().optional(),
+  kind: z.enum(["plan.change", "entitlement.override", "entitlement.reset"]),
+  planFrom: z.string().optional(),
+  planTo: z.string().optional(),
+  changes: z.array(z.object({
+    featureId: z.string(),
+    from: z.unknown(),
+    to: z.unknown(),
+  })).default([]),
+  note: z.string().optional(),
+});
+
+export const logFirmAuditEntry = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => firmAuditIn.parse(d))
+  .handler(async ({ data }): Promise<FirmAuditEntryDTO> => {
+    const { session } = await requireFirmSession();
+    const { withTenant } = await import("./db.server");
+    const row = await withTenant(session.userId, (tx) => tx.auditLog.create({
+      data: {
+        userId: session.userId,
+        workspaceId: data.workspaceId,
+        action: KIND_TO_ACTION[data.kind],
+        entity: "workspace",
+        entityId: data.workspaceId,
+        changes: {
+          workspaceName: data.workspaceName,
+          actorName: data.actorName,
+          actorRole: data.actorRole,
+          planFrom: data.planFrom,
+          planTo: data.planTo,
+          changes: data.changes,
+          note: data.note,
+        } as any,
+      },
+    }));
+    return {
+      id: row.id,
+      at: row.createdAt.toISOString(),
+      actorId: session.userId,
+      actorName: data.actorName,
+      actorRole: data.actorRole,
+      workspaceId: data.workspaceId,
+      workspaceName: data.workspaceName,
+      kind: data.kind,
+      planFrom: data.planFrom,
+      planTo: data.planTo,
+      changes: data.changes,
+      note: data.note,
+    };
+  });
