@@ -38,6 +38,7 @@ export interface ExtractionResult {
   totalAmount: number | null;
   currency: string;
   model: string;
+  postedJournalIds: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -240,6 +241,7 @@ export const extractReceiptToCsv = createServerFn({ method: "POST" })
     // 3. Persist + notify the accountant when the user is signed in.
     let id: string = crypto.randomUUID();
     let status: ExtractionResult["status"] = "draft";
+    let postedJournalIds: string[] = [];
     try {
       const { getSession, resolveWorkspaceId, resolveCompanyId } = await import(
         "./auth/session.server"
@@ -249,7 +251,7 @@ export const extractReceiptToCsv = createServerFn({ method: "POST" })
         const workspaceId = await resolveWorkspaceId(session.userId, session.role);
         const companyId = await resolveCompanyId(session.userId);
         if (workspaceId) {
-          const { prisma } = await import("./db.server");
+          const { prisma, withTenant } = await import("./db.server");
 
           const message = await prisma.message.create({
             data: {
@@ -296,6 +298,17 @@ export const extractReceiptToCsv = createServerFn({ method: "POST" })
           });
           id = record.id;
           status = "sent_to_accountant";
+
+          // 4. Auto-post double-entry journal entries directly to the ledger.
+          if (companyId) {
+            try {
+              postedJournalIds = await withTenant(session.userId, (tx) =>
+                autoPostJournal(tx, companyId, rows, parsed.supplier ?? null),
+              );
+            } catch (jerr) {
+              console.error("[ocr] auto-post journals failed", jerr);
+            }
+          }
         }
       }
     } catch (err) {
@@ -313,5 +326,72 @@ export const extractReceiptToCsv = createServerFn({ method: "POST" })
       totalAmount: parsed.totalAmount ?? null,
       currency: parsed.currency ?? "EUR",
       model: "google/gemini-2.5-flash",
+      postedJournalIds,
     };
   });
+
+// ---------------------------------------------------------------------------
+// Auto-post extracted rows as double-entry journal entries.
+// Missing chart accounts (by tili code) are created on the fly with a type
+// guessed from the Finnish code prefix (1=asset, 2=liability, 3=income,
+// 4-8=expense).
+// ---------------------------------------------------------------------------
+function guessAccountType(code: string): "ASSET" | "LIABILITY" | "EQUITY" | "INCOME" | "EXPENSE" {
+  const c = code.trim();
+  if (c.startsWith("1")) return "ASSET";
+  if (c.startsWith("2")) return "LIABILITY";
+  if (c.startsWith("3")) return "INCOME";
+  return "EXPENSE";
+}
+
+async function autoPostJournal(
+  tx: {
+    chartOfAccount: {
+      findMany: (a: { where: { companyId: string; code: { in: string[] } } }) => Promise<Array<{ id: string; code: string }>>;
+      create: (a: { data: { companyId: string; code: string; name: string; type: string } }) => Promise<{ id: string; code: string }>;
+    };
+    journalEntry: {
+      create: (a: { data: Record<string, unknown> }) => Promise<{ id: string }>;
+    };
+  },
+  companyId: string,
+  rows: ReceiptRow[],
+  supplier: string | null,
+): Promise<string[]> {
+  const debits = rows.filter((r) => r.debet !== null && r.debet > 0 && r.tili);
+  const credits = rows.filter((r) => r.kredit !== null && r.kredit > 0 && r.tili);
+  if (!debits.length || !credits.length) return [];
+
+  const codes = Array.from(new Set([...debits, ...credits].map((r) => r.tili)));
+  const existing = await tx.chartOfAccount.findMany({ where: { companyId, code: { in: codes } } });
+  const byCode = new Map<string, { id: string; code: string }>(existing.map((a) => [a.code, a]));
+  for (const code of codes) {
+    if (byCode.has(code)) continue;
+    const created = await tx.chartOfAccount.create({
+      data: { companyId, code, name: `Auto ${code}`, type: guessAccountType(code) },
+    });
+    byCode.set(code, created);
+  }
+
+  const primaryCredit = byCode.get(credits[0].tili);
+  if (!primaryCredit) return [];
+
+  const created: string[] = [];
+  for (const d of debits) {
+    const debAcc = byCode.get(d.tili);
+    if (!debAcc || !d.debet) continue;
+    const date = d.pvm ? new Date(d.pvm) : new Date();
+    const j = await tx.journalEntry.create({
+      data: {
+        companyId,
+        date: Number.isNaN(date.getTime()) ? new Date() : date,
+        memo: `${supplier ?? "Receipt"} — ${d.selite ?? ""}`.slice(0, 400),
+        debitAccountId: debAcc.id,
+        creditAccountId: primaryCredit.id,
+        amountCents: Math.round(d.debet * 100),
+      },
+    });
+    created.push(j.id);
+  }
+  return created;
+}
