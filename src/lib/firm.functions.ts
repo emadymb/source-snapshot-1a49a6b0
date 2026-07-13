@@ -512,7 +512,14 @@ export const listFirmAuditEntries = createServerFn({ method: "GET" }).handler(
             kind: ACTION_TO_KIND[r.action] ?? "entitlement.override",
             planFrom: c.planFrom ? String(c.planFrom) : undefined,
             planTo: c.planTo ? String(c.planTo) : undefined,
-            changes: Array.isArray(c.changes) ? (c.changes as FirmAuditChangeDTO[]) : [],
+            changes: Array.isArray(c.changes)
+              ? (c.changes as unknown[]).map((x) => {
+                  const o = (x ?? {}) as Record<string, unknown>;
+                  const norm = (v: unknown): FirmAuditValue =>
+                    typeof v === "string" || typeof v === "number" || typeof v === "boolean" ? v : v == null ? null : String(v);
+                  return { featureId: String(o.featureId ?? ""), from: norm(o.from), to: norm(o.to) };
+                })
+              : [],
             note: c.note ? String(c.note) : undefined,
           };
         });
