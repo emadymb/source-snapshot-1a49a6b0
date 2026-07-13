@@ -459,7 +459,8 @@ export const upsertFirmInvoice = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 // Firm audit trail (plan / entitlement changes) — persisted to AuditLog.
 // ---------------------------------------------------------------------------
-export interface FirmAuditChangeDTO { featureId: string; from: unknown; to: unknown }
+export type FirmAuditValue = string | number | boolean | null;
+export interface FirmAuditChangeDTO { featureId: string; from: FirmAuditValue; to: FirmAuditValue }
 export interface FirmAuditEntryDTO {
   id: string;
   at: string;
@@ -530,8 +531,8 @@ const firmAuditIn = z.object({
   planTo: z.string().optional(),
   changes: z.array(z.object({
     featureId: z.string(),
-    from: z.unknown(),
-    to: z.unknown(),
+    from: z.union([z.string(), z.number(), z.boolean(), z.null()]),
+    to: z.union([z.string(), z.number(), z.boolean(), z.null()]),
   })).default([]),
   note: z.string().optional(),
 });
