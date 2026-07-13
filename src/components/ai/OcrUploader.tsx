@@ -140,6 +140,12 @@ export function OcrUploader({ onResult }: { onResult?: (r: ExtractionResult) => 
             </div>
           )}
 
+          {result.postedJournalIds.length > 0 && (
+            <div className="flex items-center gap-2 rounded-2xl bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-700">
+              <Check className="size-3.5" /> تم تقييد {result.postedJournalIds.length} قيد محاسبي تلقائياً في دفتر اليومية
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-2 text-xs">
             <Stat label="Supplier" value={result.supplier ?? "—"} />
             <Stat
