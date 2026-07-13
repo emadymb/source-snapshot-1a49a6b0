@@ -344,16 +344,9 @@ function guessAccountType(code: string): "ASSET" | "LIABILITY" | "EQUITY" | "INC
   return "EXPENSE";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function autoPostJournal(
-  tx: {
-    chartOfAccount: {
-      findMany: (a: { where: { companyId: string; code: { in: string[] } } }) => Promise<Array<{ id: string; code: string }>>;
-      create: (a: { data: { companyId: string; code: string; name: string; type: string } }) => Promise<{ id: string; code: string }>;
-    };
-    journalEntry: {
-      create: (a: { data: Record<string, unknown> }) => Promise<{ id: string }>;
-    };
-  },
+  tx: any,
   companyId: string,
   rows: ReceiptRow[],
   supplier: string | null,
