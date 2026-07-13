@@ -50,13 +50,15 @@ export function PlanEntitlementsDrawer({
     if (planChanged) setPlanForWorkspace(ws.id, selectedPlanId);
     // Diff addons from plan preset
     const overrides: EntitlementMap = {};
-    const changes: { featureId: string; from: unknown; to: unknown }[] = [];
+    const norm = (v: unknown): string | number | boolean | null =>
+      typeof v === "string" || typeof v === "number" || typeof v === "boolean" ? v : v == null ? null : String(v);
+    const changes: { featureId: string; from: string | number | boolean | null; to: string | number | boolean | null }[] = [];
     for (const f of FEATURES) {
       const base = planPreset[f.id];
       const val = merged[f.id];
       if (val !== base) {
         overrides[f.id] = val;
-        changes.push({ featureId: f.id, from: base, to: val });
+        changes.push({ featureId: f.id, from: norm(base), to: norm(val) });
       }
     }
     // Reset then set each override
